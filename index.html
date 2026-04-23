@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reya7 | Interactive Weather Education</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f0ff 0%, #ffffff 100%);
+            color: #0a2f44;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0a2f44 0%, #1a6d8c 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .header h1 span {
+            color: #7ec8e0;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 25px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(26,109,140,0.15);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #1a6d8c;
+            border-right: 5px solid #1a6d8c;
+            padding-right: 15px;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+
+        /* Barometer */
+        .barometer-container {
+            text-align: center;
+        }
+
+        .pressure-slider {
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #2b7a3e, #f5a623, #d0021b);
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]:focus {
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #1a6d8c;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .weather-icon {
+            font-size: 5rem;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .pressure-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1a6d8c;
+        }
+
+        /* 3D Globe */
+        .globe-container {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(135deg, #c8e6f5, #e0f0ff);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .globe-container:active {
+            cursor: grabbing;
+        }
+
+        .globe {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 50px auto;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4c9bc7, #1a6d8c);
+            box-shadow: -10px -10px 30px rgba(0,0,0,0.2), 10px 10px 30px rgba(0,0,0,0.1);
+            animation: rotate 20s linear infinite;
+            transition: transform 0.1s linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .globe::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.3), transparent);
+        }
+
+        .pressure-marker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .globe-controls {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .globe-controls button {
+            background: #1a6d8c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            margin: 0 5px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        /* Wind Simulation */
+        .wind-simulator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .pressure-zone {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .high-pressure {
+            background: linear-gradient(135deg, #a8e6cf, #7ec8e0);
+            border: 2px solid #2b7a3e;
+        }
+
+        .low-pressure {
+            background: linear-gradient(135deg, #ffd3b6, #ffaaa5);
+            border: 2px solid #d0021b;
+        }
+
+        .wind-arrow {
+            font-size: 3rem;
+            transition: all 0.5s;
+        }
+
+        /* Live Weather */
+        .live-weather {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .weather-info {
+            text-align: center;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 15px;
+        }
+
+        /* Map */
+        .iso-map {
+            height: 300px;
+            background: linear-gradient(135deg, #d4eaf7, #a8d5e8);
+            border-radius: 15px;
+            position: relative;
+            margin-top: 15px;
+        }
+
+        /* Games Section */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 15px;
+        }
+
+        .game-card {
+            background: #f8fcff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #c8e6f5;
+        }
+
+        .game-card:hover {
+            background: #e8f4f8;
+            transform: scale(1.02);
+        }
+
+        /* Matching Game */
+        .matching-game {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .match-card {
+            background: #1a6d8c;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .match-card:hover {
+            transform: scale(1.05);
+            background: #0a4b63;
+        }
+
+        /* Quiz */
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            background: #e8f4f8;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: #c8e6f5;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a6d8c;
+            margin-top: 15px;
+        }
+
+        button {
+            background: #1a6d8c;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #0a4b63;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #0a2f44;
+            color: white;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .globe { width: 200px; height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>reya7<span>⚡</span></h1>
+    <p>Interactive Weather Education Platform | Learn About Atmospheric Pressure & Wind Patterns</p>
+</div>
+
+<div class="container">
+    
+    <!-- 1. Interactive Barometer -->
+    <div class="card">
+        <h2>📊 Interactive Barometer</h2>
+        <div class="barometer-container">
+            <div class="weather-icon" id="weatherIcon">☀️</div>
+            <div class="pressure-value" id="pressureValue">1013 hPa</div>
+            <input type="range" id="pressureSlider" class="pressure-slider" min="980" max="1040" value="1013" step="1">
+            <p>Drag the slider to change pressure</p>
+        </div>
+    </div>
+
+    <!-- 2. 3D Rotating Globe -->
+    <div class="card">
+        <h2>🌍 3D Rotating Globe</h2>
+        <div class="globe-container" id="globeContainer">
+            <div class="globe" id="globe"></div>
+        </div>
+        <div class="globe-controls">
+            <button onclick="rotateGlobeLeft()">⟳ Rotate Left</button>
+            <button onclick="rotateGlobeRight()">⟳ Rotate Right</button>
+            <button onclick="resetGlobe()">Reset</button>
+        </div>
+        <p style="text-align: center; margin-top: 15px;">🌡️ High Pressure Zones | 🌀 Low Pressure Zones | ➡️ Trade Winds</p>
+    </div>
+
+    <!-- 3. Wind Simulation - Drag the Wind -->
+    <div class="card">
+        <h2>💨 Drag the Wind Simulation</h2>
+        <div class="wind-simulator">
+            <div class="pressure-zone high-pressure" id="highPressureZone" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                <h3>🔵 High Pressure</h3>
+                <p>1040 hPa</p>
+                <p>Clear skies</p>
+            </div>
+            <div class="wind-arrow" id="windArrow">➡️</div>
+            <div class="pressure-zone low-pressure" id="lowPressureZone" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h3>🔴 Low Pressure</h3>
+                <p>990 hPa</p>
+                <p>Stormy weather</p>
+            </div>
+        </div>
+        <p id="windFeedback" style="text-align: center; margin-top: 10px; font-weight: bold;">👉 Drag the blue high pressure box to the red low pressure area!</p>
+    </div>
+
+    <!-- 4. Live Weather -->
+    <div class="card">
+        <h2>📍 Live Weather - Your City</h2>
+        <div class="live-weather" id="liveWeather">
+            <div class="weather-info">
+                <h3>📍 Loading...</h3>
+                <p id="locationName">Detecting your location...</p>
+            </div>
+            <div class="weather-info">
+                <h3>💨 Pressure</h3>
+                <p id="livePressure">-- hPa</p>
+            </div>
+            <div class="weather-info">
+                <h3>🧭 Wind Direction</h3>
+                <p id="windDirection">--</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Live Isobar Map -->
+    <div class="card">
+        <h2>🗺️ Live Isobar Map</h2>
+        <div class="iso-map" id="isoMap">
+            <svg width="100%" height="100%" viewBox="0 0 800 300" style="background: linear-gradient(135deg, #d4eaf7, #a8d5e8); border-radius: 15px;">
+                <ellipse cx="200" cy="150" rx="80" ry="60" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="5,5"/>
+                <ellipse cx="200" cy="150" rx="120" ry="90" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="5,5"/>
+                <ellipse cx="600" cy="150" rx="70" ry="50" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="5,5"/>
+                <ellipse cx="600" cy="150" rx="110" ry="80" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="5,5"/>
+                <text x="180" y="100" fill="#2b7a3e" font-size="14">1020 hPa</text>
+                <text x="580" y="100" fill="#d0021b" font-size="14">1005 hPa</text>
+                <path d="M 300 150 Q 400 100 500 150" stroke="#1a6d8c" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#1a6d8c"/>
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+        <p style="text-align: center; margin-top: 10px;">🧵 Isobars (pressure lines) | ➡️ Wind direction</p>
+    </div>
+
+    <!-- 6 & 7. Educational Games -->
+    <div class="card">
+        <h2>🎮 Educational Games</h2>
+        <div class="games-grid">
+            
+            <!-- Matching Game -->
+            <div class="game-card">
+                <h3>🃏 Match Pressure to Weather</h3>
+                <div id="matchingGame" class="matching-game">
+                    <div class="match-card" onclick="matchPressure(1013, 'sunny')">1013 hPa</div>
+                    <div class="match-card" onclick="matchPressure(990, 'stormy')">990 hPa</div>
+                    <div class="match-card" onclick="matchPressure(1025, 'cloudy')">1025 hPa</div>
+                </div>
+                <div id="matchFeedback"></div>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                    <span class="match-card" style="background: #f5a623;">☀️ Sunny</span>
+                    <span class="match-card" style="background: #7ec8e0;">☁️ Cloudy</span>
+                    <span class="match-card" style="background: #d0021b;">🌩️ Stormy</span>
+                </div>
+            </div>
+
+            <!-- Drag Wind Belts Game -->
+            <div class="game-card">
+                <h3>🗺️ Drag Wind Belts</h3>
+                <div style="background: #d4eaf7; padding: 20px; border-radius: 15px; text-align: center;">
+                    <div style="background: #a8d5e8; margin: 5px; padding: 8px; border-radius: 8px;" draggable="true" ondragstart="dragWindBelt(event)" id="tradeWinds">🌬️ Trade Winds</div>
+                    <div style="background: #a8d5e8; margin: 5px; padding: 8px; border-radius: 8px;" draggable="true" ondragstart="dragWindBelt(event)" id="westerlies">🌪️ Westerlies</div>
+                    <div style="background: #a8d5e8; margin: 5px; padding: 8px; border-radius: 8px;" draggable="true" ondragstart="dragWindBelt(event)" id="polar">❄️ Polar Winds</div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <div style="background: #e8f4f8; padding: 15px; border-radius: 10px;" ondrop="dropWindBelt(event)" ondragover="allowDrop(event)" id="dropZone1">🌴 Drop Trade Winds Here (Equator)</div>
+                    <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; margin-top: 10px;" ondrop="dropWindBelt(event)" ondragover="allowDrop(event)" id="dropZone2">🌍 Drop Westerlies Here (Mid-Latitude)</div>
+                    <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; margin-top: 10px;" ondrop="dropWindBelt(event)" ondragover="allowDrop(event)" id="dropZone3">❄️ Drop Polar Winds Here (Poles)</div>
+                </div>
+                <div id="beltFeedback"></div>
+            </div>
+
+            <!-- Quiz -->
+            <div class="game-card">
+                <h3>📝 Quick Weather Quiz</h3>
+                <div id="quizContainer">
+                    <div class="quiz-question" id="quizQuestion">What is standard sea-level pressure?</div>
+                    <div class="quiz-options" id="quizOptions">
+                        <div class="quiz-option" onclick="checkAnswer(0)">980 hPa</div>
+                        <div class="quiz-option" onclick="checkAnswer(1)">1013 hPa ✅</div>
+                        <div class="quiz-option" onclick="checkAnswer(2)">1040 hPa</div>
+                    </div>
+                </div>
+                <div class="score" id="quizScore">Score: 0</div>
+                <div id="quizFeedback"></div>
+                <button onclick="nextQuestion()">Next Question ➡️</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>reya7.com | Learn weather patterns through interactive simulations</p>
+</footer>
+
+<script>
+    // 1. Barometer
+    const slider = document.getElementById('pressureSlider');
+    const pressureValue = document.getElementById('pressureValue');
+    const weatherIcon = document.getElementById('weatherIcon');
+
+    slider.addEventListener('input', function() {
+        let pressure = this.value;
+        pressureValue.textContent = pressure + ' hPa';
+        
+        if (pressure >= 1025) {
+            weatherIcon.innerHTML = '☀️ Sunny';
+            weatherIcon.style.color = '#f5a623';
+        } else if (pressure >= 1005 && pressure < 1025) {
+            weatherIcon.innerHTML = '⛅ Cloudy';
+            weatherIcon.style.color = '#7ec8e0';
+        } else {
+            weatherIcon.innerHTML = '🌩️ Stormy';
+            weatherIcon.style.color = '#d0021b';
+        }
+    });
+
+    // 2. Globe Rotation
+    let rotationAngle = 0;
+    const globe = document.getElementById('globe');
+
+    function rotateGlobeLeft() {
+        rotationAngle -= 30;
+        globe.style.transform = `rotate(${rotationAngle}deg)`;
+    }
+
+    function rotateGlobeRight() {
+        rotationAngle += 30;
+        globe.style.transform = `rotate(${rotationAngle}deg)`;
+    }
+
+    function resetGlobe() {
+        rotationAngle = 0;
+        globe.style.transform = `rotate(0deg)`;
+    }
+
+    // 3. Wind Simulation Drag
+    let draggedItem = null;
+
+    function dragStart(event) {
+        draggedItem = event.target;
+        event.dataTransfer.setData("text/plain", "highPressure");
+    }
+
+    function dragEnd(event) {
+        draggedItem = null;
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        const windArrow = document.getElementById('windArrow');
+        const feedback = document.getElementById('windFeedback');
+        
+        windArrow.style.fontSize = '5rem';
+        windArrow.style.transform = 'scale(1.5)';
+        windArrow.innerHTML = '💨➡️🌀';
+        feedback.innerHTML = '✅ Wind created! Air moves from high to low pressure!';
+        feedback.style.color = '#155724';
+        
+        setTimeout(() => {
+            windArrow.style.fontSize = '3rem';
+            windArrow.style.transform = 'scale(1)';
+            windArrow.innerHTML = '➡️';
+        }, 2000);
+    }
+
+    // 4. Live Weather (Simulated)
+    function getLiveWeather() {
+        const pressure = Math.floor(Math.random() * (1040 - 980 + 1) + 980);
+        document.getElementById('livePressure').textContent = pressure + ' hPa';
+        
+        const directions = ['North', 'NE', 'East', 'SE', 'South', 'SW', 'West', 'NW'];
+        const randomDir = directions[Math.floor(Math.random() * directions.length)];
+        document.getElementById('windDirection').textContent = randomDir;
+        document.getElementById('locationName').textContent = 'Current Location';
+    }
+    
+    getLiveWeather();
+    setInterval(getLiveWeather, 30000);
+
+    // 5. Matching Game
+    let matchScore = 0;
+
+    function matchPressure(pressure, type) {
+        const feedback = document.getElementById('matchFeedback');
+        let correct = false;
+        
+        if (pressure === 1013 && type === 'sunny') {
+            correct = true;
+        } else if (pressure === 990 && type === 'stormy') {
+            correct = true;
+        } else if (pressure === 1025 && type === 'cloudy') {
+            correct = true;
+        }
+        
+        if (correct) {
+            feedback.innerHTML = '<div class="feedback success">✅ Correct! Great job matching pressure to weather!</div>';
+            matchScore++;
+        } else {
+            feedback.innerHTML = '<div class="feedback error">❌ Try again! Remember: high pressure = clear skies, low pressure = storms</div>';
+        }
+        
+        setTimeout(() => feedback.innerHTML = '', 2000);
+    }
+
+    // 6. Drag Wind Belts
+    let draggedBelt = null;
+
+    function dragWindBelt(event) {
+        draggedBelt = event.target.id;
+        event.dataTransfer.setData("text/plain", draggedBelt);
+    }
+
+    function dropWindBelt(event) {
+        event.preventDefault();
+        const dropZoneId = event.target.id;
+        const feedback = document.getElementById('beltFeedback');
+        
+        if ((draggedBelt === 'tradeWinds' && dropZoneId === 'dropZone1') ||
+            (draggedBelt === 'westerlies' && dropZoneId === 'dropZone2') ||
+            (draggedBelt === 'polar' && dropZoneId === 'dropZone3')) {
+            feedback.innerHTML = '<div class="feedback success">✅ Perfect! You placed it correctly!</div>';
+            event.target.style.background = '#c8e6f5';
+            event.target.innerHTML += ' ✓';
+        } else {
+            feedback.innerHTML = '<div class="feedback error">❌ Wrong location! Trade winds near equator, Westerlies in mid-latitudes, Polar winds at poles</div>';
+        }
+        
+        setTimeout(() => feedback.innerHTML = '', 2000);
+    }
+
+    // 7. Quiz
+    let quizScore = 0;
+    let currentQuestion = 0;
+    
+    const questions = [
+        { text: "What is standard sea-level pressure?", options: ["980 hPa", "1013 hPa ✅", "1040 hPa"], correct: 1 },
+        { text: "Where do trade winds occur?", options: ["Near Equator ✅", "Near Poles", "Only in deserts"], correct: 0 },
+        { text: "High pressure usually brings...", options: ["Rain", "Clear skies ✅", "Hurricanes"], correct: 1 },
+        { text: "What is an isobar?", options: ["Line of equal pressure ✅", "Wind direction", "Temperature line"], correct: 0 }
+    ];
+
+    function checkAnswer(selected) {
+        const isCorrect = (selected === questions[currentQuestion].correct);
+        const feedback = document.getElementById('quizFeedback');
+        
+        if (isCorrect) {
+            quizScore += 10;
+            feedback.innerHTML = '<div class="feedback success">✅ Correct! +10 points!</div>';
+        } else {
+            feedback.innerHTML = '<div class="feedback error">❌ Wrong answer! Try the next question.</div>';
+        }
+        
+        document.getElementById('quizScore').textContent = `Score: ${quizScore}`;
+        
+        setTimeout(() => {
+            feedback.innerHTML = '';
+            nextQuestion();
+        }, 1500);
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            document.getElementById('quizQuestion').textContent = questions[currentQuestion].text;
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            questions[currentQuestion].options.forEach((opt, idx) => {
+                optionsDiv.innerHTML += `<div class="quiz-option" onclick="checkAnswer(${idx})">${opt}</div>`;
+            });
+        } else {
+            document.getElementById('quizContainer').innerHTML = `<div class="feedback success">🏆 Quiz Complete! Final Score: ${quizScore}/40 🎉</div>`;
+        }
+    }
+
+    // Globe interactive drag
+    let isDragging = false;
+    let startX;
+    let currentRotation = 0;
+
+    globe.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        globe.style.animation = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            const dx = e.clientX - startX;
+            currentRotation += dx / 5;
+            globe.style.transform = `rotate(${currentRotation}deg)`;
+            startX = e.clientX;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+</script>
+
+</body>
+</html>

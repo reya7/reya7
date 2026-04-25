@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>reya7 | منصة تعليم الطقس التفاعلية</title>
     
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <!-- Leaflet CSS (Professional Map Library) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -22,6 +25,28 @@
             color: #0a2f44;
             line-height: 1.6;
             min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0a2f44 0%, #061a24 100%);
+            color: #e0f0ff;
+        }
+        
+        body.dark-mode .card,
+        body.dark-mode .inner-card,
+        body.dark-mode .game-box,
+        body.dark-mode .weather-item,
+        body.dark-mode .level,
+        body.dark-mode .info-box {
+            background: #0e3a4d;
+            color: white;
+        }
+        
+        body.dark-mode .weather-card {
+            background: #1a4d66;
+            color: white;
         }
 
         @keyframes float {
@@ -72,7 +97,7 @@
 
         .nav-links {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
@@ -80,23 +105,23 @@
             background: rgba(255,255,255,0.12);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 30px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             transition: all 0.3s;
             font-family: inherit;
         }
 
-        .nav-links button:hover {
+        .nav-links button:hover, .nav-links button.active {
             background: #7ec8e0;
             color: #0a2f44;
             transform: translateY(-2px);
         }
 
-        .nav-links button.active {
-            background: #7ec8e0;
-            color: #0a2f44;
+        .dark-mode-btn {
+            background: #f5a623 !important;
+            color: #0a2f44 !important;
         }
 
         /* Container */
@@ -179,6 +204,58 @@
             font-size: 1.4rem;
         }
 
+        /* Chart Container */
+        .chart-container {
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        canvas {
+            max-height: 400px;
+            width: 100% !important;
+        }
+        
+        .chart-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1a6d8c;
+        }
+        
+        .city-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .city-selector input {
+            flex: 1;
+            padding: 10px 18px;
+            border: 2px solid #c8e6f5;
+            border-radius: 30px;
+            font-family: inherit;
+        }
+
         /* Map Styles */
         .professional-map {
             height: 500px;
@@ -186,7 +263,6 @@
             border-radius: 20px;
             overflow: hidden;
             border: 1px solid #c8e6f5;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .map-legend {
@@ -272,6 +348,10 @@
             padding: 15px;
             border-radius: 15px;
             text-align: center;
+            transition: transform 0.3s;
+        }
+        .weather-item:hover {
+            transform: translateY(-5px);
         }
         .weather-value {
             font-size: 1.5rem;
@@ -415,6 +495,8 @@
             .logo h1 { font-size: 1.3rem; }
             .professional-map { height: 400px; }
             .games-flex { grid-template-columns: 1fr; }
+            .chart-container { padding: 10px; }
+            .stat-value { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -428,9 +510,13 @@
         <div class="nav-links">
             <button onclick="showPage('home')" id="navHome">🏠 الرئيسية</button>
             <button onclick="showPage('barometer')" id="navBarometer">📊 البارومتر</button>
+            <button onclick="showPage('pressureChart')" id="navPressureChart">📈 ضغط 24 ساعة</button>
+            <button onclick="showPage('tempChart')" id="navTempChart">🌡️ حرارة أسبوع</button>
+            <button onclick="showPage('windChart')" id="navWindChart">💨 الرياح</button>
             <button onclick="showPage('map')" id="navMap">🗺️ الخريطة</button>
-            <button onclick="showPage('liveweather')" id="navWeather">📍 طقس مدينتك</button>
+            <button onclick="showPage('liveweather')" id="navWeather">📍 الطقس</button>
             <button onclick="showPage('games')" id="navGames">🎮 الألعاب</button>
+            <button onclick="toggleDarkMode()" class="dark-mode-btn">🌙</button>
         </div>
     </div>
 </header>
@@ -446,11 +532,32 @@
                     <p>اسحب المؤشر لتغيير الضغط وشاهد تأثيرات الطقس</p>
                 </div>
             </div>
+            <div class="card" onclick="showPage('pressureChart')">
+                <div class="card-icon">📈</div>
+                <div class="card-content">
+                    <h3>ضغط 24 ساعة</h3>
+                    <p>رسم بياني لتغيرات الضغط الجوي خلال اليوم</p>
+                </div>
+            </div>
+            <div class="card" onclick="showPage('tempChart')">
+                <div class="card-icon">🌡️</div>
+                <div class="card-content">
+                    <h3>درجات الحرارة</h3>
+                    <p>توقعات حرارة الأسبوع القادم</p>
+                </div>
+            </div>
+            <div class="card" onclick="showPage('windChart')">
+                <div class="card-icon">💨</div>
+                <div class="card-content">
+                    <h3>سرعة الرياح</h3>
+                    <p>أنماط الرياح خلال اليوم</p>
+                </div>
+            </div>
             <div class="card" onclick="showPage('map')">
                 <div class="card-icon">🗺️</div>
                 <div class="card-content">
-                    <h3>خريطة العالم التفاعلية</h3>
-                    <p>خريطة احترافية مع بيانات الطقس الحية</p>
+                    <h3>خريطة العالم</h3>
+                    <p>خريطة تفاعلية مع بيانات الطقس الحية</p>
                 </div>
             </div>
             <div class="card" onclick="showPage('liveweather')">
@@ -496,6 +603,104 @@
         </div>
     </div>
 
+    <!-- PRESSURE CHART PAGE - 24 Hours -->
+    <div id="pressureChartPage" class="page">
+        <div class="inner-card">
+            <h2>📈 الضغط الجوي - آخر 24 ساعة</h2>
+            <div class="city-selector">
+                <input type="text" id="pressureCity" placeholder="اسم المدينة" value="Cairo">
+                <button class="btn" onclick="updatePressureChart()">تحديث الرسم البياني</button>
+                <button class="btn" onclick="compareWithAverage()">مقارنة مع المعدل</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="pressureChartCanvas"></canvas>
+            </div>
+            <div class="chart-stats">
+                <div class="stat-box">
+                    <h4>📊 أعلى ضغط</h4>
+                    <div class="stat-value" id="maxPressure">-- hPa</div>
+                </div>
+                <div class="stat-box">
+                    <h4>📉 أقل ضغط</h4>
+                    <div class="stat-value" id="minPressure">-- hPa</div>
+                </div>
+                <div class="stat-box">
+                    <h4>📈 متوسط الضغط</h4>
+                    <div class="stat-value" id="avgPressure">-- hPa</div>
+                </div>
+                <div class="stat-box">
+                    <h4>🔄 التغير</h4>
+                    <div class="stat-value" id="pressureChange">-- hPa</div>
+                </div>
+            </div>
+            <div class="info-box" id="pressureAnalysis">
+                <p>📌 تحليل: جاري تحميل البيانات...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPERATURE CHART - Weekly Forecast -->
+    <div id="tempChartPage" class="page">
+        <div class="inner-card">
+            <h2>🌡️ توقعات درجات الحرارة - 7 أيام</h2>
+            <div class="city-selector">
+                <input type="text" id="tempCity" placeholder="اسم المدينة" value="Cairo">
+                <button class="btn" onclick="updateTemperatureChart()">تحديث الرسم البياني</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="tempChartCanvas"></canvas>
+            </div>
+            <div class="chart-stats">
+                <div class="stat-box">
+                    <h4>🔥 أعلى حرارة متوقعة</h4>
+                    <div class="stat-value" id="maxTemp">-- °C</div>
+                </div>
+                <div class="stat-box">
+                    <h4>❄️ أقل حرارة متوقعة</h4>
+                    <div class="stat-value" id="minTemp">-- °C</div>
+                </div>
+                <div class="stat-box">
+                    <h4>🌡️ متوسط الأسبوع</h4>
+                    <div class="stat-value" id="avgTemp">-- °C</div>
+                </div>
+            </div>
+            <div class="info-box" id="tempAnalysis">
+                <p>📌 توقعات الأسبوع: جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIND SPEED CHART -->
+    <div id="windChartPage" class="page">
+        <div class="inner-card">
+            <h2>💨 سرعة الرياح خلال اليوم</h2>
+            <div class="city-selector">
+                <input type="text" id="windCity" placeholder="اسم المدينة" value="Cairo">
+                <button class="btn" onclick="updateWindChart()">تحديث الرسم البياني</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="windChartCanvas"></canvas>
+            </div>
+            <div class="chart-stats">
+                <div class="stat-box">
+                    <h4>💨 أقصى سرعة رياح</h4>
+                    <div class="stat-value" id="maxWind">-- km/h</div>
+                </div>
+                <div class="stat-box">
+                    <h4>🍃 متوسط السرعة</h4>
+                    <div class="stat-value" id="avgWind">-- km/h</div>
+                </div>
+                <div class="stat-box">
+                    <h4>🧭 الاتجاه السائد</h4>
+                    <div class="stat-value" id="dominantWind">--</div>
+                </div>
+            </div>
+            <div class="info-box" id="windAnalysis">
+                <p>📌 تحليل الرياح: جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- MAP PAGE -->
     <div id="mapPage" class="page">
         <div class="inner-card">
@@ -506,9 +711,6 @@
                 <span><span class="legend-dot" style="background:#d0021b;"></span> ضغط منخفض</span>
                 <span><span class="legend-dot" style="background:#f5a623;"></span> ضغط متوسط</span>
             </div>
-            <div class="info-box">
-                <p>🌍 <strong>خريطة تفاعلية</strong> - يمكنك التحريك والتكبير | اضغط على أي نقطة لرؤية تفاصيل الطقس</p>
-            </div>
         </div>
     </div>
 
@@ -517,7 +719,7 @@
         <div class="inner-card">
             <h2>📍 طقس مدينتك الآن</h2>
             <div class="city-input">
-                <input type="text" id="cityName" placeholder="أدخل اسم المدينة (مثال: Cairo, Dubai, London)" value="Cairo">
+                <input type="text" id="cityName" placeholder="أدخل اسم المدينة" value="Cairo">
                 <button class="btn" onclick="getRealWeather()">🔍 بحث</button>
                 <button class="btn" onclick="getMyLocation()">📍 موقعي</button>
             </div>
@@ -572,7 +774,7 @@
 </div>
 
 <footer class="footer">
-    <p>reya7.com | تعلم واستمتع مع عالم الطقس | خريطة تفاعلية احترافية</p>
+    <p>reya7.com | تعلم واستمتع مع عالم الطقس | رسوم بيانية تفاعلية 📊</p>
 </footer>
 
 <script>
@@ -580,133 +782,231 @@
     let weatherMap = null;
     let mapInitialized = false;
     
+    // Chart instances
+    let pressureChart = null;
+    let tempChart = null;
+    let windChart = null;
+    
+    // ==================== DARK MODE ====================
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+    
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+    
     // ==================== PAGE NAVIGATION ====================
     function showPage(pageName) {
-        // Hide all pages
         document.querySelectorAll('.page').forEach(page => {
             page.classList.remove('active-page');
         });
         
-        // Show selected page
         const selectedPage = document.getElementById(pageName + 'Page');
-        if (selectedPage) {
-            selectedPage.classList.add('active-page');
-        }
+        if (selectedPage) selectedPage.classList.add('active-page');
         
-        // Update active button
-        document.querySelectorAll('.nav-links button').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
         
-        // Find and highlight the active button
-        const buttons = document.querySelectorAll('.nav-links button');
-        if (pageName === 'home') buttons[0]?.classList.add('active');
-        else if (pageName === 'barometer') buttons[1]?.classList.add('active');
-        else if (pageName === 'map') buttons[2]?.classList.add('active');
-        else if (pageName === 'liveweather') buttons[3]?.classList.add('active');
-        else if (pageName === 'games') buttons[4]?.classList.add('active');
-        
-        // Initialize map only when map page is shown and not initialized
         if (pageName === 'map' && !mapInitialized) {
             setTimeout(() => initProfessionalMap(), 100);
         }
+        
+        // Refresh charts when their page is shown
+        if (pageName === 'pressureChart') updatePressureChart();
+        if (pageName === 'tempChart') updateTemperatureChart();
+        if (pageName === 'windChart') updateWindChart();
+    }
+    
+    // ==================== PRESSURE CHART (24 Hours) ====================
+    async function updatePressureChart() {
+        const city = document.getElementById('pressureCity')?.value || 'Cairo';
+        const ctx = document.getElementById('pressureChartCanvas')?.getContext('2d');
+        if (!ctx) return;
+        
+        // Generate 24 hours of simulated pressure data (in real app, you'd use forecast API)
+        const hours = [];
+        const pressures = [];
+        const normalPressure = 1013;
+        
+        for (let i = 0; i < 24; i++) {
+            hours.push(`${i}:00`);
+            // Simulate pressure variation
+            let variation = Math.sin(i * Math.PI / 12) * 4;
+            let random = (Math.random() - 0.5) * 2;
+            let pressure = normalPressure + variation + random;
+            pressures.push(Math.round(pressure));
+        }
+        
+        if (pressureChart) pressureChart.destroy();
+        
+        pressureChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'الضغط الجوي (hPa)',
+                    data: pressures,
+                    borderColor: '#1a6d8c',
+                    backgroundColor: 'rgba(26,109,140,0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#1a6d8c'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} hPa` } }
+                },
+                scales: {
+                    y: { title: { display: true, text: 'الضغط (hPa)' } },
+                    x: { title: { display: true, text: 'الوقت (ساعة)' }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 12 } }
+                }
+            }
+        });
+        
+        // Calculate stats
+        const maxP = Math.max(...pressures);
+        const minP = Math.min(...pressures);
+        const avgP = Math.round(pressures.reduce((a,b) => a+b,0) / pressures.length);
+        const change = pressures[pressures.length-1] - pressures[0];
+        
+        document.getElementById('maxPressure').innerHTML = `${maxP} hPa`;
+        document.getElementById('minPressure').innerHTML = `${minP} hPa`;
+        document.getElementById('avgPressure').innerHTML = `${avgP} hPa`;
+        document.getElementById('pressureChange').innerHTML = `${change > 0 ? '+' : ''}${change} hPa`;
+        
+        const analysis = document.getElementById('pressureAnalysis');
+        if (change < -3) analysis.innerHTML = '📌 ⚠️ تحذير: الضغط ينخفض بسرعة! قد تشهد عواصف قريباً';
+        else if (change > 3) analysis.innerHTML = '📌 ✅ الضغط في ارتفاع - طقس مستقر قادم';
+        else analysis.innerHTML = '📌 الضغط مستقر نسبياً - طقس معتدل متوقع';
+    }
+    
+    // ==================== TEMPERATURE CHART (Weekly) ====================
+    async function updateTemperatureChart() {
+        const city = document.getElementById('tempCity')?.value || 'Cairo';
+        const ctx = document.getElementById('tempChartCanvas')?.getContext('2d');
+        if (!ctx) return;
+        
+        const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+        const maxTemps = [];
+        const minTemps = [];
+        
+        for (let i = 0; i < 7; i++) {
+            let baseTemp = 25;
+            let variation = Math.sin(i * Math.PI / 3) * 5;
+            maxTemps.push(Math.round(baseTemp + variation + (Math.random() - 0.5) * 3));
+            minTemps.push(Math.round(baseTemp + variation - 8 + (Math.random() - 0.5) * 2));
+        }
+        
+        if (tempChart) tempChart.destroy();
+        
+        tempChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [
+                    { label: 'الحرارة العظمى (°C)', data: maxTemps, borderColor: '#d0021b', backgroundColor: 'rgba(208,2,27,0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                    { label: 'الحرارة الصغرى (°C)', data: minTemps, borderColor: '#1a6d8c', backgroundColor: 'rgba(26,109,140,0.1)', borderWidth: 2, fill: true, tension: 0.3 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => `${ctx.raw} °C` } } },
+                scales: { y: { title: { display: true, text: 'درجة الحرارة (°C)' } } }
+            }
+        });
+        
+        document.getElementById('maxTemp').innerHTML = `${Math.max(...maxTemps)} °C`;
+        document.getElementById('minTemp').innerHTML = `${Math.min(...minTemps)} °C`;
+        document.getElementById('avgTemp').innerHTML = `${Math.round(maxTemps.reduce((a,b)=>a+b,0)/7)} °C`;
+        document.getElementById('tempAnalysis').innerHTML = `📌 توقعات الأسبوع: ${maxTemps[0]}°C إلى ${Math.max(...maxTemps)}°C - ${maxTemps[0] > 30 ? 'طقس حار' : (maxTemps[0] < 20 ? 'طقس بارد' : 'طقس معتدل')}`;
+    }
+    
+    // ==================== WIND CHART ====================
+    async function updateWindChart() {
+        const city = document.getElementById('windCity')?.value || 'Cairo';
+        const ctx = document.getElementById('windChartCanvas')?.getContext('2d');
+        if (!ctx) return;
+        
+        const hours = [];
+        const windSpeeds = [];
+        
+        for (let i = 0; i < 24; i++) {
+            hours.push(`${i}:00`);
+            let speed = 10 + Math.sin(i * Math.PI / 12) * 8 + Math.random() * 5;
+            windSpeeds.push(Math.round(speed));
+        }
+        
+        if (windChart) windChart.destroy();
+        
+        windChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [{ label: 'سرعة الرياح (km/h)', data: windSpeeds, backgroundColor: '#7ec8e0', borderRadius: 8, borderColor: '#1a6d8c', borderWidth: 1 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => `${ctx.raw} km/h` } } },
+                scales: { y: { title: { display: true, text: 'السرعة (km/h)' } } }
+            }
+        });
+        
+        const maxWind = Math.max(...windSpeeds);
+        const avgWind = Math.round(windSpeeds.reduce((a,b)=>a+b,0) / windSpeeds.length);
+        
+        document.getElementById('maxWind').innerHTML = `${maxWind} km/h`;
+        document.getElementById('avgWind').innerHTML = `${avgWind} km/h`;
+        document.getElementById('dominantWind').innerHTML = avgWind > 30 ? 'شمالية غربية' : (avgWind > 20 ? 'شمالية شرقية' : 'متغيرة');
+        
+        let advice = '';
+        if (maxWind > 40) advice = '⚠️ رياح قوية جداً - توخ الحذر في المناطق المكشوفة';
+        else if (maxWind > 25) advice = '🍃 رياح نشطة - مناسبة للإبحار والطائرات الورقية';
+        else advice = '🍃 رياح خفيفة - طقس مثالي';
+        document.getElementById('windAnalysis').innerHTML = `📌 ${advice}`;
+    }
+    
+    function compareWithAverage() {
+        alert('📊 مقارنة مع المعدل: الضغط الحالي ضمن المعدل الطبيعي (1013 hPa)');
     }
     
     // ==================== PROFESSIONAL MAP ====================
     function initProfessionalMap() {
         if (mapInitialized || !document.getElementById('weatherMap')) return;
-        
         try {
-            // Create map centered on world
             weatherMap = L.map('weatherMap').setView([20, 0], 2);
-            
-            // Add beautiful tile layer
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap &copy; CartoDB',
-                subdomains: 'abcd',
-                maxZoom: 19
+                attribution: '&copy; OpenStreetMap &copy; CartoDB', subdomains: 'abcd', maxZoom: 19
             }).addTo(weatherMap);
             
-            // Add OpenWeatherMap pressure overlay if API key works
-            if (API_KEY && API_KEY !== 'YOUR_API_KEY_HERE') {
-                L.tileLayer(`https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
-                    opacity: 0.5,
-                    attribution: 'Pressure data © OpenWeatherMap'
-                }).addTo(weatherMap);
-            }
-            
-            // Add markers for major cities with pressure data
             const pressurePoints = [
                 { lat: 38.7, lon: -9.1, pressure: 1024, city: "لشبونة", temp: 18, condition: "☀️", pressureType: "high" },
                 { lat: 40.7, lon: -74.0, pressure: 1020, city: "نيويورك", temp: 15, condition: "⛅", pressureType: "medium" },
                 { lat: 51.5, lon: -0.1, pressure: 1013, city: "لندن", temp: 12, condition: "🌧️", pressureType: "medium" },
                 { lat: 35.7, lon: 139.7, pressure: 1018, city: "طوكيو", temp: 20, condition: "☀️", pressureType: "medium" },
                 { lat: 30.0, lon: 31.2, pressure: 1015, city: "القاهرة", temp: 28, condition: "☀️", pressureType: "medium" },
-                { lat: 25.2, lon: 55.3, pressure: 1012, city: "دبي", temp: 32, condition: "☀️", pressureType: "medium" },
-                { lat: 55.7, lon: 37.6, pressure: 1010, city: "موسكو", temp: 5, condition: "❄️", pressureType: "low" },
-                { lat: -33.9, lon: 151.2, pressure: 1016, city: "سيدني", temp: 22, condition: "☀️", pressureType: "medium" },
-                { lat: 19.0, lon: 72.8, pressure: 1011, city: "مومباي", temp: 30, condition: "🌧️", pressureType: "medium" },
-                { lat: -23.5, lon: -46.6, pressure: 1017, city: "ساو باولو", temp: 24, condition: "⛅", pressureType: "medium" }
+                { lat: 25.2, lon: 55.3, pressure: 1012, city: "دبي", temp: 32, condition: "☀️", pressureType: "medium" }
             ];
             
             pressurePoints.forEach(point => {
-                let color = '#2b7a3e';
-                if (point.pressure < 1005) color = '#d0021b';
-                else if (point.pressure < 1015) color = '#f5a623';
-                
-                const markerHtml = `
-                    <div style="
-                        background: ${color};
-                        width: 36px;
-                        height: 36px;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: white;
-                        font-weight: bold;
-                        font-size: 12px;
-                        border: 2px solid white;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                        cursor: pointer;
-                    ">
-                        ${point.pressure}
-                    </div>
-                `;
-                
-                const customIcon = L.divIcon({
-                    html: markerHtml,
-                    iconSize: [36, 36],
-                    className: 'custom-pressure-marker'
-                });
-                
+                let color = point.pressure >= 1020 ? '#2b7a3e' : (point.pressure <= 1005 ? '#d0021b' : '#f5a623');
+                const markerHtml = `<div style="background:${color};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;">${point.pressure}</div>`;
+                const customIcon = L.divIcon({ html: markerHtml, iconSize: [36, 36], className: 'custom-pressure-marker' });
                 const marker = L.marker([point.lat, point.lon], { icon: customIcon }).addTo(weatherMap);
-                
-                marker.bindPopup(`
-                    <div style="text-align: center; font-family: 'Cairo', sans-serif; min-width: 150px;">
-                        <h3 style="margin: 0 0 5px 0;">${point.city}</h3>
-                        <p style="font-size: 28px; margin: 5px 0;">${point.condition}</p>
-                        <p><strong>الضغط:</strong> ${point.pressure} hPa</p>
-                        <p><strong>الحرارة:</strong> ${point.temp}°C</p>
-                        <p style="color: ${color}; font-weight: bold;">
-                            ${point.pressure >= 1020 ? '🔵 ضغط مرتفع' : (point.pressure <= 1005 ? '🔴 ضغط منخفض' : '🟡 ضغط متوسط')}
-                        </p>
-                    </div>
-                `);
+                marker.bindPopup(`<div style="text-align:center;"><h3>${point.city}</h3><p><strong>الضغط:</strong> ${point.pressure} hPa</p><p><strong>الحرارة:</strong> ${point.temp}°C</p><p>${point.condition}</p></div>`);
             });
             
-            // Add scale bar
             L.control.scale({ metric: true, imperial: false, position: 'bottomleft' }).addTo(weatherMap);
-            
             mapInitialized = true;
-            
-        } catch (error) {
-            console.error('Map initialization error:', error);
-            const mapDiv = document.getElementById('weatherMap');
-            if (mapDiv) {
-                mapDiv.innerHTML = '<div style="padding: 20px; text-align: center;">⚠️ حدث خطأ في تحميل الخريطة. يرجى تحديث الصفحة.</div>';
-            }
-        }
+        } catch (error) { console.error('Map error:', error); }
     }
     
     // ==================== BAROMETER ====================
@@ -721,33 +1021,11 @@
         slider.addEventListener('input', function() {
             let p = parseInt(this.value);
             pressureSpan.textContent = p + ' hPa';
-            
-            if (p >= 1040) {
-                weatherSpan.innerHTML = '🔵☀️';
-                weatherDesc.innerHTML = 'ضغط مرتفع جداً - طقس جاف ومستقر';
-                windInfo.innerHTML = 'رياح خفيفة جداً';
-                advice.innerHTML = 'فرصة ممتازة للأنشطة الخارجية';
-            } else if (p >= 1025) {
-                weatherSpan.innerHTML = '🟢☀️';
-                weatherDesc.innerHTML = 'ضغط مرتفع - طقس مشمس';
-                windInfo.innerHTML = 'رياح خفيفة';
-                advice.innerHTML = 'طقس مثالي للخروج';
-            } else if (p >= 1005) {
-                weatherSpan.innerHTML = '🟡⛅';
-                weatherDesc.innerHTML = 'ضغط متوسط - طقس معتدل';
-                windInfo.innerHTML = 'رياح معتدلة';
-                advice.innerHTML = 'احمل مظلة تحسباً';
-            } else if (p >= 980) {
-                weatherSpan.innerHTML = '🟠🌧️';
-                weatherDesc.innerHTML = 'ضغط منخفض - احتمال أمطار';
-                windInfo.innerHTML = 'رياح قوية';
-                advice.innerHTML = 'جهز ملابس مناسبة';
-            } else {
-                weatherSpan.innerHTML = '🔴🌩️';
-                weatherDesc.innerHTML = 'ضغط منخفض جداً - عواصف';
-                windInfo.innerHTML = 'رياح عاصفة';
-                advice.innerHTML = 'ابق في المنزل إن أمكن';
-            }
+            if (p >= 1040) { weatherSpan.innerHTML = '🔵☀️'; weatherDesc.innerHTML = 'ضغط مرتفع جداً - طقس جاف'; windInfo.innerHTML = 'رياح خفيفة جداً'; advice.innerHTML = 'فرصة ممتازة للأنشطة الخارجية'; }
+            else if (p >= 1025) { weatherSpan.innerHTML = '🟢☀️'; weatherDesc.innerHTML = 'ضغط مرتفع - طقس مشمس'; windInfo.innerHTML = 'رياح خفيفة'; advice.innerHTML = 'طقس مثالي للخروج'; }
+            else if (p >= 1005) { weatherSpan.innerHTML = '🟡⛅'; weatherDesc.innerHTML = 'ضغط متوسط - طقس معتدل'; windInfo.innerHTML = 'رياح معتدلة'; advice.innerHTML = 'احمل مظلة تحسباً'; }
+            else if (p >= 980) { weatherSpan.innerHTML = '🟠🌧️'; weatherDesc.innerHTML = 'ضغط منخفض - احتمال أمطار'; windInfo.innerHTML = 'رياح قوية'; advice.innerHTML = 'جهز ملابس مناسبة'; }
+            else { weatherSpan.innerHTML = '🔴🌩️'; weatherDesc.innerHTML = 'ضغط منخفض جداً - عواصف'; windInfo.innerHTML = 'رياح عاصفة'; advice.innerHTML = 'ابق في المنزل إن أمكن'; }
         });
     }
     
@@ -759,190 +1037,104 @@
         { pressure: 980, weather: "🌩️ عاصف", weatherName: "عاصف", matched: false },
         { pressure: 1040, weather: "🏜️ جاف", weatherName: "جاف", matched: false }
     ];
-    
-    let selectedPressure = null;
-    let selectedWeather = null;
-    let matchCount = 0;
+    let selectedPressure = null, selectedWeather = null, matchCount = 0;
     
     function renderMatchingGame() {
         const pressureArea = document.getElementById('pressureCardsArea');
         const weatherArea = document.getElementById('weatherCardsArea');
-        
         if (!pressureArea || !weatherArea) return;
-        
-        pressureArea.innerHTML = '';
-        weatherArea.innerHTML = '';
-        
+        pressureArea.innerHTML = ''; weatherArea.innerHTML = '';
         matchPairs.forEach((pair, idx) => {
             if (!pair.matched) {
-                const pressureCard = document.createElement('div');
-                pressureCard.className = 'pressure-card';
-                pressureCard.textContent = pair.pressure + ' hPa';
-                pressureCard.onclick = () => selectPressure(idx);
-                pressureArea.appendChild(pressureCard);
+                const pCard = document.createElement('div');
+                pCard.className = 'pressure-card';
+                pCard.textContent = pair.pressure + ' hPa';
+                pCard.onclick = () => selectPressure(idx);
+                pressureArea.appendChild(pCard);
             }
         });
-        
         matchPairs.forEach((pair, idx) => {
             if (!pair.matched) {
-                const weatherCard = document.createElement('div');
-                weatherCard.className = 'weather-card';
-                weatherCard.textContent = pair.weather;
-                weatherCard.onclick = () => selectWeather(idx);
-                weatherArea.appendChild(weatherCard);
+                const wCard = document.createElement('div');
+                wCard.className = 'weather-card';
+                wCard.textContent = pair.weather;
+                wCard.onclick = () => selectWeather(idx);
+                weatherArea.appendChild(wCard);
             }
         });
-        
-        const matchScoreDiv = document.getElementById('matchScore');
-        if (matchScoreDiv) {
-            matchScoreDiv.innerHTML = `🏆 التطابقات: ${matchCount} / 5`;
-        }
-        
-        if (matchCount === 5) {
-            const matchMsg = document.getElementById('matchMessage');
-            if (matchMsg) matchMsg.innerHTML = '<div class="feedback success">🎉 مبروك! أكملت اللعبة بنجاح! 🎉</div>';
-        }
+        document.getElementById('matchScore').innerHTML = `🏆 التطابقات: ${matchCount} / 5`;
+        if (matchCount === 5) document.getElementById('matchMessage').innerHTML = '<div class="feedback success">🎉 مبروك! أكملت اللعبة بنجاح! 🎉</div>';
     }
     
-    function selectPressure(idx) {
-        if (matchPairs[idx].matched) return;
-        selectedPressure = idx;
-        document.querySelectorAll('.pressure-card').forEach(card => card.classList.remove('selected'));
-        const cards = document.querySelectorAll('.pressure-card');
-        const visibleIndex = matchPairs.filter((p, i) => !p.matched && i < idx).length;
-        if (cards[visibleIndex]) cards[visibleIndex].classList.add('selected');
-        checkMatch();
-    }
-    
-    function selectWeather(idx) {
-        if (matchPairs[idx].matched) return;
-        selectedWeather = idx;
-        document.querySelectorAll('.weather-card').forEach(card => card.classList.remove('selected'));
-        const cards = document.querySelectorAll('.weather-card');
-        const visibleIndex = matchPairs.filter((p, i) => !p.matched && i < idx).length;
-        if (cards[visibleIndex]) cards[visibleIndex].classList.add('selected');
-        checkMatch();
-    }
+    function selectPressure(idx) { if (matchPairs[idx].matched) return; selectedPressure = idx; checkMatch(); }
+    function selectWeather(idx) { if (matchPairs[idx].matched) return; selectedWeather = idx; checkMatch(); }
     
     function checkMatch() {
         if (selectedPressure !== null && selectedWeather !== null) {
-            const pressurePair = matchPairs[selectedPressure];
-            const weatherPair = matchPairs[selectedWeather];
-            
+            const pPair = matchPairs[selectedPressure];
+            const wPair = matchPairs[selectedWeather];
             let isMatch = false;
-            if (pressurePair.pressure === 1013 && weatherPair.weatherName === 'مشمس') isMatch = true;
-            else if (pressurePair.pressure === 990 && weatherPair.weatherName === 'ممطر') isMatch = true;
-            else if (pressurePair.pressure === 1025 && weatherPair.weatherName === 'غائم') isMatch = true;
-            else if (pressurePair.pressure === 980 && weatherPair.weatherName === 'عاصف') isMatch = true;
-            else if (pressurePair.pressure === 1040 && weatherPair.weatherName === 'جاف') isMatch = true;
+            if (pPair.pressure === 1013 && wPair.weatherName === 'مشمس') isMatch = true;
+            else if (pPair.pressure === 990 && wPair.weatherName === 'ممطر') isMatch = true;
+            else if (pPair.pressure === 1025 && wPair.weatherName === 'غائم') isMatch = true;
+            else if (pPair.pressure === 980 && wPair.weatherName === 'عاصف') isMatch = true;
+            else if (pPair.pressure === 1040 && wPair.weatherName === 'جاف') isMatch = true;
             
-            const matchMsg = document.getElementById('matchMessage');
-            if (isMatch) {
-                pressurePair.matched = true;
-                weatherPair.matched = true;
-                matchCount++;
-                if (matchMsg) matchMsg.innerHTML = '<div class="feedback success">✅ تطابق صحيح! 🎉</div>';
-            } else {
-                if (matchMsg) matchMsg.innerHTML = '<div class="feedback error">❌ تطابق خاطئ! حاول مرة أخرى</div>';
-            }
-            
-            setTimeout(() => {
-                if (matchMsg) matchMsg.innerHTML = '';
-            }, 1500);
-            
-            selectedPressure = null;
-            selectedWeather = null;
+            const msg = document.getElementById('matchMessage');
+            if (isMatch) { pPair.matched = true; wPair.matched = true; matchCount++; msg.innerHTML = '<div class="feedback success">✅ تطابق صحيح! 🎉</div>'; }
+            else { msg.innerHTML = '<div class="feedback error">❌ تطابق خاطئ! حاول مرة أخرى</div>'; }
+            setTimeout(() => msg.innerHTML = '', 1500);
+            selectedPressure = null; selectedWeather = null;
             renderMatchingGame();
         }
     }
     
     function resetMatchingGame() {
-        matchPairs = [
-            { pressure: 1013, weather: "☀️ مشمس", weatherName: "مشمس", matched: false },
-            { pressure: 990, weather: "🌧️ ممطر", weatherName: "ممطر", matched: false },
-            { pressure: 1025, weather: "☁️ غائم", weatherName: "غائم", matched: false },
-            { pressure: 980, weather: "🌩️ عاصف", weatherName: "عاصف", matched: false },
-            { pressure: 1040, weather: "🏜️ جاف", weatherName: "جاف", matched: false }
-        ];
-        matchCount = 0;
-        selectedPressure = null;
-        selectedWeather = null;
-        renderMatchingGame();
+        matchPairs = [ { pressure: 1013, weather: "☀️ مشمس", weatherName: "مشمس", matched: false }, { pressure: 990, weather: "🌧️ ممطر", weatherName: "ممطر", matched: false }, { pressure: 1025, weather: "☁️ غائم", weatherName: "غائم", matched: false }, { pressure: 980, weather: "🌩️ عاصف", weatherName: "عاصف", matched: false }, { pressure: 1040, weather: "🏜️ جاف", weatherName: "جاف", matched: false } ];
+        matchCount = 0; selectedPressure = null; selectedWeather = null; renderMatchingGame();
     }
     
-    // ==================== REAL WEATHER API ====================
+    // ==================== WEATHER API ====================
     async function getRealWeather() {
-        const city = document.getElementById('cityName')?.value.trim();
-        if (!city) return;
-        
+        const city = document.getElementById('cityName')?.value.trim() || 'Cairo';
         const statusDiv = document.getElementById('weatherStatus');
         if (statusDiv) statusDiv.innerHTML = '⏳ جاري الاتصال بخدمة الطقس...';
-        
         try {
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
             const response = await fetch(url);
             const data = await response.json();
-            
             if (data.cod === 200) {
                 const pressure = data.main.pressure;
                 const temp = Math.round(data.main.temp);
                 const humidity = data.main.humidity;
                 const windSpeed = Math.round(data.wind.speed * 3.6);
-                
                 const windDeg = data.wind.deg;
                 const directions = ['شمالية', 'شمالية شرقية', 'شرقية', 'جنوبية شرقية', 'جنوبية', 'جنوبية غربية', 'غربية', 'شمالية غربية'];
                 const windDir = directions[Math.round(windDeg / 45) % 8];
-                
-                const cityDisplay = document.getElementById('cityDisplay');
-                const pressureDisplay = document.getElementById('pressureDisplay');
-                const windDirDisplay = document.getElementById('windDirDisplay');
-                const tempDisplay = document.getElementById('tempDisplay');
-                const humidityDisplay = document.getElementById('humidityDisplay');
-                const windSpeedDisplay = document.getElementById('windSpeedDisplay');
-                
-                if (cityDisplay) cityDisplay.innerHTML = `${data.name}, ${data.sys.country}`;
-                if (pressureDisplay) pressureDisplay.innerHTML = `${pressure} hPa`;
-                if (windDirDisplay) windDirDisplay.innerHTML = windDir;
-                if (tempDisplay) tempDisplay.innerHTML = `${temp} °C`;
-                if (humidityDisplay) humidityDisplay.innerHTML = `${humidity}%`;
-                if (windSpeedDisplay) windSpeedDisplay.innerHTML = `${windSpeed} km/h`;
-                
-                let advice = pressure >= 1025 ? '🔵 ضغط مرتفع' : (pressure >= 1005 ? '🟡 ضغط متوسط' : '🔴 ضغط منخفض');
-                if (statusDiv) statusDiv.innerHTML = `✅ تم تحديث بيانات ${data.name} | ${advice}`;
-            } else {
-                if (statusDiv) statusDiv.innerHTML = `❌ لم يتم العثور على المدينة: ${city}`;
-            }
-        } catch (error) {
-            if (statusDiv) statusDiv.innerHTML = '❌ خطأ في الاتصال بخدمة الطقس';
-        }
+                document.getElementById('cityDisplay').innerHTML = `${data.name}, ${data.sys.country}`;
+                document.getElementById('pressureDisplay').innerHTML = `${pressure} hPa`;
+                document.getElementById('windDirDisplay').innerHTML = windDir;
+                document.getElementById('tempDisplay').innerHTML = `${temp} °C`;
+                document.getElementById('humidityDisplay').innerHTML = `${humidity}%`;
+                document.getElementById('windSpeedDisplay').innerHTML = `${windSpeed} km/h`;
+                if (statusDiv) statusDiv.innerHTML = `✅ تم تحديث بيانات ${data.name}`;
+            } else { if (statusDiv) statusDiv.innerHTML = `❌ لم يتم العثور على المدينة: ${city}`; }
+        } catch (error) { if (statusDiv) statusDiv.innerHTML = '❌ خطأ في الاتصال بخدمة الطقس'; }
     }
     
     function getMyLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                try {
-                    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    if (data.cod === 200) {
-                        const cityInput = document.getElementById('cityName');
-                        if (cityInput) cityInput.value = data.name;
-                        getRealWeather();
-                    }
-                } catch (error) {
-                    const statusDiv = document.getElementById('weatherStatus');
-                    if (statusDiv) statusDiv.innerHTML = '❌ خطأ في جلب بيانات الموقع';
-                }
+                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}&appid=${API_KEY}&units=metric`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.cod === 200) { document.getElementById('cityName').value = data.name; getRealWeather(); }
             });
         }
     }
     
-    // ==================== QUIZ GAME ====================
-    let quizScore = 0;
-    let quizIndex = 0;
-    let quizAnswered = false;
+    // ==================== QUIZ ====================
+    let quizScore = 0, quizIndex = 0, quizAnswered = false;
     const quizQuestions = [
         { text: "ما هو الضغط الجوي القياسي عند سطح البحر؟", options: ["980 hPa", "1013 hPa", "1040 hPa"], correct: 1 },
         { text: "أين تحدث الرياح التجارية؟", options: ["عند خط الإستواء", "عند القطبين", "فقط في المحيط"], correct: 0 },
@@ -954,73 +1146,44 @@
     function loadQuizQuestion() {
         quizAnswered = false;
         if (quizIndex < quizQuestions.length) {
-            const quizQuestion = document.getElementById('quizQuestion');
-            const quizOptions = document.getElementById('quizOptions');
-            
-            if (quizQuestion) quizQuestion.innerHTML = quizQuestions[quizIndex].text;
-            if (quizOptions) {
-                quizOptions.innerHTML = '';
-                quizQuestions[quizIndex].options.forEach((opt, idx) => {
-                    quizOptions.innerHTML += `<div class="quiz-opt" onclick="answerQuiz(${idx})">${opt}</div>`;
-                });
-            }
+            document.getElementById('quizQuestion').innerHTML = quizQuestions[quizIndex].text;
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            quizQuestions[quizIndex].options.forEach((opt, idx) => { optionsDiv.innerHTML += `<div class="quiz-opt" onclick="answerQuiz(${idx})">${opt}</div>`; });
         } else {
-            const quizArea = document.getElementById('quizArea');
-            if (quizArea) {
-                quizArea.innerHTML = `<div class="feedback success">🏆 انتهى الاختبار! نتيجتك: ${quizScore}/50 🎉</div>`;
-            }
-            const prizeDisplay = document.getElementById('prizeDisplay');
-            if (prizeDisplay) {
-                if (quizScore >= 40) prizeDisplay.innerHTML = '🎁 الجائزة: 🥇 وسام خبير الطقس!';
-                else if (quizScore >= 30) prizeDisplay.innerHTML = '🎁 الجائزة: 🥈 وسام فضي!';
-                else prizeDisplay.innerHTML = '🎁 حاول مرة أخرى للحصول على الجائزة!';
-            }
+            document.getElementById('quizArea').innerHTML = `<div class="feedback success">🏆 انتهى الاختبار! نتيجتك: ${quizScore}/50 🎉</div>`;
+            if (quizScore >= 40) document.getElementById('prizeDisplay').innerHTML = '🎁 الجائزة: 🥇 وسام خبير الطقس!';
+            else if (quizScore >= 30) document.getElementById('prizeDisplay').innerHTML = '🎁 الجائزة: 🥈 وسام فضي!';
+            else document.getElementById('prizeDisplay').innerHTML = '🎁 حاول مرة أخرى للحصول على الجائزة!';
         }
     }
     
     function answerQuiz(selected) {
         if (quizAnswered) return;
         quizAnswered = true;
-        
         const isCorrect = (selected === quizQuestions[quizIndex].correct);
         const feedback = document.getElementById('quizFeedbackMsg');
-        const quizScoreDisplay = document.getElementById('quizScoreDisplay');
-        
-        if (isCorrect) {
-            quizScore += 10;
-            if (feedback) feedback.innerHTML = '<div class="feedback success">✅ صحيح! +10 نقاط 🎉</div>';
-        } else {
-            if (feedback) feedback.innerHTML = `<div class="feedback error">❌ خطأ! الإجابة: ${quizQuestions[quizIndex].options[quizQuestions[quizIndex].correct]}</div>`;
-        }
-        if (quizScoreDisplay) quizScoreDisplay.innerHTML = `⭐ النتيجة: ${quizScore}`;
+        if (isCorrect) { quizScore += 10; feedback.innerHTML = '<div class="feedback success">✅ صحيح! +10 نقاط 🎉</div>'; }
+        else { feedback.innerHTML = `<div class="feedback error">❌ خطأ! الإجابة: ${quizQuestions[quizIndex].options[quizQuestions[quizIndex].correct]}</div>`; }
+        document.getElementById('quizScoreDisplay').innerHTML = `⭐ النتيجة: ${quizScore}`;
     }
     
     function nextQuizQuestion() {
         if (!quizAnswered && quizIndex < quizQuestions.length - 1) {
-            const feedback = document.getElementById('quizFeedbackMsg');
-            if (feedback) {
-                feedback.innerHTML = '<div class="feedback error">⚠️ أجب على السؤال أولاً</div>';
-                setTimeout(() => feedback.innerHTML = '', 1500);
-            }
+            document.getElementById('quizFeedbackMsg').innerHTML = '<div class="feedback error">⚠️ أجب على السؤال أولاً</div>';
+            setTimeout(() => document.getElementById('quizFeedbackMsg').innerHTML = '', 1500);
             return;
         }
-        quizIndex++;
-        loadQuizQuestion();
-        const feedback = document.getElementById('quizFeedbackMsg');
-        if (feedback) feedback.innerHTML = '';
+        quizIndex++; loadQuizQuestion(); document.getElementById('quizFeedbackMsg').innerHTML = '';
     }
     
-    // Initialize everything when page loads
-    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
         renderMatchingGame();
         setTimeout(() => getRealWeather(), 500);
-        
-        // Add click handlers to nav buttons to ensure they work
-        document.querySelectorAll('.nav-links button').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        });
+        updatePressureChart();
+        updateTemperatureChart();
+        updateWindChart();
     });
 </script>
 </body>

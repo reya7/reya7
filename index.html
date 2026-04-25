@@ -34,6 +34,16 @@
             50% { transform: scale(1.05); }
         }
 
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake-animation {
+            animation: shake 0.3s ease-in-out;
+        }
+
         /* Header */
         .main-header {
             background: linear-gradient(135deg, #0a2f44 0%, #1a6d8c 100%);
@@ -183,7 +193,6 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             border: 1px solid rgba(26,109,140,0.1);
-            transition: all 0.3s;
         }
 
         .inner-card h2 {
@@ -228,10 +237,6 @@
             background: #1a6d8c;
             cursor: pointer;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-        }
-        .pressure-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
         }
         .pressure-levels {
             display: flex;
@@ -256,16 +261,18 @@
 
         /* World Map */
         .world-map-container {
-            background: linear-gradient(135deg, #a8d5e8, #c8e6f5);
+            background: linear-gradient(135deg, #4a9bc7, #6bb5d6);
             border-radius: 25px;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: auto;
         }
         .world-map-svg {
             width: 100%;
+            min-width: 1000px;
             height: auto;
-            border-radius: 15px;
+            display: block;
+            margin: 0 auto;
         }
         .map-legend {
             display: flex;
@@ -315,7 +322,7 @@
         /* Games */
         .games-flex {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 30px;
         }
         .game-box {
@@ -335,40 +342,96 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        .matching-buttons {
+        
+        /* Matching Game Styles */
+        .matching-game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .pressure-cards {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .match-card {
-            background: linear-gradient(135deg, #1a6d8c, #0e4d66);
-            color: white;
-            padding: 12px 22px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-            border: none;
-        }
-        .match-card:hover {
-            transform: scale(1.08);
-            background: #0e4d66;
-        }
-        .weather-types {
-            display: flex;
             gap: 15px;
             justify-content: center;
-            flex-wrap: wrap;
         }
-        .weather-type {
-            background: #e8f4f8;
-            padding: 10px 20px;
-            border-radius: 40px;
+        .pressure-card {
+            background: linear-gradient(135deg, #1a6d8c, #0e4d66);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #1a6d8c;
+            text-align: center;
+            min-width: 100px;
         }
+        .pressure-card:hover {
+            transform: scale(1.05);
+            background: #0e4d66;
+        }
+        .pressure-card.selected {
+            background: #f5a623;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(245,166,35,0.5);
+        }
+        .pressure-card.matched {
+            background: #2b7a3e;
+            opacity: 0.6;
+            cursor: default;
+            transform: none;
+        }
+        .weather-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .weather-card {
+            background: #e8f4f8;
+            padding: 15px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            min-width: 120px;
+            border: 2px solid #c8e6f5;
+        }
+        .weather-card:hover {
+            transform: scale(1.05);
+            background: #c8e6f5;
+        }
+        .weather-card.selected {
+            background: #f5a623;
+            border-color: #d0021b;
+            transform: scale(1.05);
+        }
+        .weather-card.matched {
+            background: #2b7a3e;
+            opacity: 0.6;
+            cursor: default;
+            transform: none;
+            color: white;
+        }
+        .game-score {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 30px;
+            margin: 15px 0;
+        }
+        .game-reset-btn {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* Quiz Styles */
         .quiz-area {
             margin-top: 20px;
         }
@@ -379,6 +442,7 @@
             border-radius: 18px;
             margin-bottom: 15px;
             text-align: center;
+            font-weight: bold;
         }
         .quiz-options {
             display: grid;
@@ -386,16 +450,21 @@
         }
         .quiz-opt {
             background: #f0f8ff;
-            padding: 12px;
+            padding: 14px;
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
             font-weight: 500;
+            border: 1px solid #c8e6f5;
         }
         .quiz-opt:hover {
             background: #c8e6f5;
             transform: translateX(-8px);
+        }
+        .quiz-opt.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .score-box {
             font-size: 1.2rem;
@@ -409,16 +478,18 @@
         .feedback {
             padding: 10px;
             border-radius: 12px;
-            margin-top: 15px;
+            margin-top: 10px;
             text-align: center;
         }
         .success {
             background: #d4edda;
             color: #155724;
+            border-right: 4px solid #2b7a3e;
         }
         .error {
             background: #f8d7da;
             color: #721c24;
+            border-right: 4px solid #d0021b;
         }
         .btn {
             background: #1a6d8c;
@@ -448,6 +519,7 @@
             .cards-grid { grid-template-columns: 1fr; }
             .games-flex { grid-template-columns: 1fr; }
             .weather-value { font-size: 1.3rem; }
+            .pressure-card, .weather-card { padding: 10px 15px; font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -484,7 +556,7 @@
                 <div class="card-icon">🌍</div>
                 <div class="card-content">
                     <h3>الكرة الأرضية</h3>
-                    <p>خريطة العالم مع مناطق الضغط وتيارات الرياح</p>
+                    <p>خريطة العالم مع مناطق الضغط وتيارات الرياح الحقيقية</p>
                 </div>
             </div>
             <div class="card" onclick="showPage('liveweather')">
@@ -505,7 +577,7 @@
                 <div class="card-icon">🎮</div>
                 <div class="card-content">
                     <h3>الألعاب التعليمية</h3>
-                    <p>تحديات ممتعة لاختبار معرفتك بالطقس</p>
+                    <p>لعبة التطابق والاختبارات التفاعلية</p>
                 </div>
             </div>
         </div>
@@ -537,51 +609,115 @@
         </div>
     </div>
 
-    <!-- GLOBE PAGE -->
+    <!-- GLOBE PAGE - Realistic Flat Map -->
     <div id="globePage" class="page">
         <div class="inner-card">
-            <h2>🌍 الكرة الأرضية - أنظمة الضغط والرياح</h2>
+            <h2>🌍 الكرة الأرضية - أنظمة الضغط والرياح العالمية</h2>
             <div class="world-map-container">
-                <svg class="world-map-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="1000" height="500" fill="#4a9bc7"/>
+                <svg class="world-map-svg" viewBox="0 0 1100 500" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Ocean Background -->
+                    <rect width="1100" height="500" fill="#4a9bc7"/>
+                    
+                    <!-- Latitude/Longitude Lines -->
+                    <g stroke="rgba(255,255,255,0.2)" stroke-width="0.8">
+                        <line x1="0" y1="50" x2="1100" y2="50"/>
+                        <line x1="0" y1="125" x2="1100" y2="125"/>
+                        <line x1="0" y1="200" x2="1100" y2="200"/>
+                        <line x1="0" y1="275" x2="1100" y2="275"/>
+                        <line x1="0" y1="350" x2="1100" y2="350"/>
+                        <line x1="0" y1="425" x2="1100" y2="425"/>
+                        <line x1="183" y1="0" x2="183" y2="500"/>
+                        <line x1="366" y1="0" x2="366" y2="500"/>
+                        <line x1="550" y1="0" x2="550" y2="500"/>
+                        <line x1="733" y1="0" x2="733" y2="500"/>
+                        <line x1="916" y1="0" x2="916" y2="500"/>
+                    </g>
+                    
                     <!-- North America -->
-                    <path d="M120,80 Q150,60 180,90 Q200,120 190,160 Q180,200 160,220 Q130,230 120,200 Q110,160 115,120 Z" fill="#8fbc8f" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <path d="M130,70 L170,60 L210,75 L230,95 L240,125 L230,165 L210,185 L190,195 
+                             L170,205 L150,215 L130,220 L120,200 L110,175 L105,145 L110,115 L120,90 Z" 
+                          fill="#7cb58c" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <!-- Greenland -->
+                    <path d="M420,40 L450,35 L465,50 L460,70 L440,75 L425,65 L415,50 Z" fill="#b8d8b8" stroke="#2d5a3f" stroke-width="1"/>
+                    <!-- Central America -->
+                    <path d="M210,225 L225,220 L235,235 L230,255 L220,265 L205,255 L200,240 Z" fill="#7cb58c" stroke="#2d5a3f" stroke-width="1"/>
+                    
                     <!-- South America -->
-                    <path d="M190,240 Q220,230 230,260 Q240,300 230,340 Q220,370 200,380 Q185,370 180,340 Q175,300 185,270 Z" fill="#8fbc8f" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <path d="M200,290 L235,280 L250,310 L260,350 L255,390 L240,420 L220,430 L205,415 L195,380 L190,340 L195,310 Z" 
+                          fill="#7cb58c" stroke="#2d5a3f" stroke-width="1.5"/>
+                    
                     <!-- Europe -->
-                    <path d="M500,60 Q530,50 550,70 Q560,90 550,120 Q540,140 520,150 Q500,145 495,120 Q490,90 500,60 Z" fill="#8fbc8f" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <path d="M540,70 L575,60 L600,80 L610,100 L600,130 L585,145 L560,150 L540,145 L530,120 L525,95 Z" 
+                          fill="#7cb58c" stroke="#2d5a3f" stroke-width="1.5"/>
+                    
                     <!-- Africa -->
-                    <path d="M490,160 Q520,155 530,180 Q540,220 535,270 Q525,310 500,330 Q485,320 480,285 Q475,240 480,200 Z" fill="#c8b58a" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <path d="M530,170 L565,165 L580,190 L590,230 L585,280 L570,320 L545,340 L525,330 L515,295 L510,250 L515,205 Z" 
+                          fill="#c8b58a" stroke="#2d5a3f" stroke-width="1.5"/>
+                    
                     <!-- Asia -->
-                    <path d="M560,50 Q600,40 650,50 Q690,60 710,85 Q720,110 700,140 Q680,165 650,170 Q620,168 600,155 Q570,140 560,110 Z" fill="#8fbc8f" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <path d="M610,60 L660,45 L720,55 L760,70 L780,95 L790,120 L770,150 L740,170 L700,175 L670,168 L640,155 L620,140 L605,110 L600,85 Z" 
+                          fill="#7cb58c" stroke="#2d5a3f" stroke-width="1.5"/>
+                    
+                    <!-- India -->
+                    <path d="M670,180 L695,175 L705,200 L710,230 L695,250 L675,255 L665,235 L660,210 L665,190 Z" 
+                          fill="#c8b58a" stroke="#2d5a3f" stroke-width="1"/>
+                    
+                    <!-- Southeast Asia -->
+                    <path d="M720,230 L745,225 L760,240 L765,260 L755,275 L735,270 L725,255 L718,240 Z" 
+                          fill="#7cb58c" stroke="#2d5a3f" stroke-width="1"/>
+                    
                     <!-- Australia -->
-                    <path d="M740,300 Q770,290 790,305 Q800,325 790,345 Q770,355 750,350 Q735,340 735,320 Z" fill="#c8b58a" stroke="#2d5a3f" stroke-width="1.5"/>
+                    <path d="M800,310 L835,300 L860,315 L870,340 L860,365 L835,370 L815,360 L805,340 L800,320 Z" 
+                          fill="#c8b58a" stroke="#2d5a3f" stroke-width="1.5"/>
                     
-                    <!-- High Pressure H -->
-                    <circle cx="380" cy="140" r="18" fill="none" stroke="#2b7a3e" stroke-width="2.5"/>
-                    <circle cx="380" cy="140" r="35" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="4,3"/>
-                    <circle cx="380" cy="140" r="55" fill="none" stroke="#2b7a3e" stroke-width="1.5" stroke-dasharray="4,3"/>
-                    <text x="370" y="145" fill="#2b7a3e" font-size="18" font-weight="bold">H</text>
-                    <text x="360" y="125" fill="#2b7a3e" font-size="10">1025 hPa</text>
+                    <!-- Antarctica -->
+                    <path d="M200,460 L400,445 L600,440 L800,445 L950,455 L900,475 L700,480 L500,485 L300,480 L150,470 Z" 
+                          fill="#e8e8e8" stroke="#2d5a3f" stroke-width="1"/>
                     
-                    <!-- Low Pressure L -->
-                    <circle cx="520" cy="100" r="15" fill="none" stroke="#d0021b" stroke-width="2.5"/>
-                    <circle cx="520" cy="100" r="30" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="4,3"/>
-                    <text x="515" y="105" fill="#d0021b" font-size="18" font-weight="bold">L</text>
+                    <!-- HIGH PRESSURE - Azores (H) -->
+                    <circle cx="420" cy="130" r="20" fill="none" stroke="#2b7a3e" stroke-width="2.5"/>
+                    <circle cx="420" cy="130" r="40" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="5,4"/>
+                    <circle cx="420" cy="130" r="65" fill="none" stroke="#2b7a3e" stroke-width="1.5" stroke-dasharray="5,4"/>
+                    <text x="410" y="135" fill="#2b7a3e" font-size="20" font-weight="bold">H</text>
+                    <text x="400" y="110" fill="#2b7a3e" font-size="11">1025 hPa</text>
+                    <text x="390" y="160" fill="#0a2f44" font-size="9">مرتفع آزور</text>
                     
-                    <!-- Trade Winds -->
-                    <path d="M250,200 Q350,180 450,210" stroke="#1a6d8c" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
-                    <path d="M250,280 Q350,260 450,280" stroke="#1a6d8c" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
-                    <!-- Westerlies -->
-                    <path d="M200,160 Q350,175 500,155" stroke="#1a6d8c" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
-                    <!-- Polar Winds -->
-                    <path d="M350,50 Q450,60 550,45" stroke="#4a6a7e" stroke-width="2" fill="none" marker-end="url(#arrowGray)"/>
+                    <!-- HIGH PRESSURE - Siberia -->
+                    <circle cx="680" cy="90" r="16" fill="none" stroke="#2b7a3e" stroke-width="2.5"/>
+                    <circle cx="680" cy="90" r="35" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="5,4"/>
+                    <text x="670" y="95" fill="#2b7a3e" font-size="18" font-weight="bold">H</text>
+                    <text x="660" y="75" fill="#2b7a3e" font-size="10">1030 hPa</text>
                     
-                    <text x="360" y="170" fill="#0a2f44" font-size="9">مرتفع آزور</text>
-                    <text x="535" y="115" fill="#0a2f44" font-size="9">منخفض آيسلندا</text>
-                    <text x="460" y="225" fill="#0a2f44" font-size="10">الرياح التجارية</text>
-                    <text x="300" y="145" fill="#0a2f44" font-size="10">الرياح العكسية</text>
+                    <!-- LOW PRESSURE - Iceland (L) -->
+                    <circle cx="560" cy="100" r="18" fill="none" stroke="#d0021b" stroke-width="2.5"/>
+                    <circle cx="560" cy="100" r="35" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="5,4"/>
+                    <text x="550" y="105" fill="#d0021b" font-size="20" font-weight="bold">L</text>
+                    <text x="540" y="85" fill="#d0021b" font-size="10">990 hPa</text>
+                    <text x="530" y="130" fill="#0a2f44" font-size="9">منخفض آيسلندا</text>
                     
+                    <!-- LOW PRESSURE - ITCZ (Equator) -->
+                    <circle cx="550" cy="230" r="14" fill="none" stroke="#d0021b" stroke-width="2"/>
+                    <circle cx="550" cy="230" r="30" fill="none" stroke="#d0021b" stroke-width="1.5" stroke-dasharray="5,4"/>
+                    <text x="542" y="235" fill="#d0021b" font-size="16" font-weight="bold">L</text>
+                    <text x="520" y="215" fill="#d0021b" font-size="9">ITCZ</text>
+                    
+                    <!-- TRADE WINDS (NE and SE) -->
+                    <path d="M270,210 Q380,185 480,215" stroke="#1a6d8c" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
+                    <path d="M300,240 Q400,215 500,245" stroke="#1a6d8c" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                    <path d="M270,280 Q380,260 480,280" stroke="#1a6d8c" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
+                    <text x="350" y="240" fill="#0a2f44" font-size="10">الرياح التجارية</text>
+                    
+                    <!-- WESTERLIES -->
+                    <path d="M220,170 Q400,190 550,165" stroke="#1a6d8c" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
+                    <path d="M250,195 Q430,215 580,190" stroke="#1a6d8c" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                    <text x="380" y="180" fill="#0a2f44" font-size="10">الرياح العكسية</text>
+                    
+                    <!-- POLAR EASTERLIES -->
+                    <path d="M300,45 Q450,60 600,45" stroke="#4a6a7e" stroke-width="2" fill="none" marker-end="url(#arrowGray)"/>
+                    <path d="M350,65 Q500,78 650,63" stroke="#4a6a7e" stroke-width="1.5" fill="none" marker-end="url(#arrowGray)"/>
+                    <text x="450" y="55" fill="#0a2f44" font-size="9">رياح قطبية</text>
+                    
+                    <!-- Defs for markers -->
                     <defs>
                         <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
                             <polygon points="0 0, 10 3.5, 0 7" fill="#1a6d8c"/>
@@ -595,18 +731,21 @@
             <div class="map-legend">
                 <span style="color:#2b7a3e;">● H</span> ضغط مرتفع
                 <span style="color:#d0021b;">● L</span> ضغط منخفض
-                <span style="color:#1a6d8c;">➡</span> رياح تجارية/عكسية
+                <span style="color:#1a6d8c;">➡</span> رياح تجارية
+                <span style="color:#1a6d8c;">➡</span> رياح عكسية
                 <span style="color:#4a6a7e;">➡</span> رياح قطبية
             </div>
             <div class="info-box">
                 <p><strong>🌍 معلومات حقيقية:</strong> مرتفع آزور (Azores High) - ضغط مرتفع فوق المحيط الأطلسي</p>
-                <p><strong>🌀 منخفض آيسلندا:</strong> منطقة ضغط منخفض تؤثر على طقس أوروبا</p>
+                <p><strong>🌀 منخفض آيسلندا (Icelandic Low):</strong> منطقة ضغط منخفض تؤثر على طقس أوروبا</p>
                 <p><strong>🌬️ الرياح التجارية:</strong> تهب من خطوط العرض 30° نحو خط الإستواء</p>
+                <p><strong>🌪️ الرياح العكسية (Westerlies):</strong> تهب من خط الاستواء نحو القطبين</p>
+                <p><strong>❄️ الرياح القطبية:</strong> تهب من القطبين باتجاه المناطق المعتدلة</p>
             </div>
         </div>
     </div>
 
-    <!-- LIVE WEATHER PAGE with REAL API -->
+    <!-- LIVE WEATHER PAGE -->
     <div id="liveweatherPage" class="page">
         <div class="inner-card">
             <h2>📍 طقس مدينتك الآن - بيانات حية</h2>
@@ -635,24 +774,43 @@
         <div class="inner-card">
             <h2>🗺️ خريطة الضغط العالمية - خطوط الإيزوبار</h2>
             <div class="world-map-container">
-                <svg class="world-map-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="1000" height="500" fill="#a8d5e8"/>
-                    <!-- Isobars -->
-                    <ellipse cx="350" cy="150" rx="60" ry="50" fill="none" stroke="#2b7a3e" stroke-width="2.5" stroke-dasharray="8,4"/>
-                    <ellipse cx="350" cy="150" rx="110" ry="85" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="8,4"/>
-                    <ellipse cx="350" cy="150" rx="160" ry="120" fill="none" stroke="#2b7a3e" stroke-width="1.5" stroke-dasharray="8,4"/>
-                    <text x="330" y="145" fill="#2b7a3e" font-size="14" font-weight="bold">1024 hPa</text>
+                <svg class="world-map-svg" viewBox="0 0 1100 500" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="1100" height="500" fill="#a8d5e8"/>
                     
-                    <ellipse cx="750" cy="200" rx="55" ry="45" fill="none" stroke="#d0021b" stroke-width="2.5" stroke-dasharray="8,4"/>
-                    <ellipse cx="750" cy="200" rx="100" ry="75" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="8,4"/>
-                    <text x="735" y="195" fill="#d0021b" font-size="14" font-weight="bold">1002 hPa</text>
+                    <!-- Continent outlines -->
+                    <path d="M130,70 L170,60 L210,75 L230,95 L240,125 L230,165 L210,185 L190,195 
+                             L170,205 L150,215 L130,220 L120,200 L110,175 L105,145 L110,115 L120,90 Z" 
+                          fill="rgba(126,174,126,0.3)" stroke="#5a8a5a" stroke-width="1"/>
+                    <path d="M200,290 L235,280 L250,310 L260,350 L255,390 L240,420 L220,430 L205,415 
+                             L195,380 L190,340 L195,310 Z" fill="rgba(126,174,126,0.3)" stroke="#5a8a5a" stroke-width="1"/>
+                    <path d="M540,70 L575,60 L600,80 L610,100 L600,130 L585,145 L560,150 L540,145 
+                             L530,120 L525,95 Z" fill="rgba(126,174,126,0.3)" stroke="#5a8a5a" stroke-width="1"/>
+                    <path d="M530,170 L565,165 L580,190 L590,230 L585,280 L570,320 L545,340 
+                             L525,330 L515,295 L510,250 L515,205 Z" fill="rgba(200,180,138,0.3)" stroke="#8a7a4a" stroke-width="1"/>
+                    <path d="M610,60 L660,45 L720,55 L760,70 L780,95 L790,120 L770,150 L740,170 
+                             L700,175 L670,168 L640,155 L620,140 L605,110 L600,85 Z" fill="rgba(126,174,126,0.3)" stroke="#5a8a5a" stroke-width="1"/>
                     
-                    <ellipse cx="640" cy="270" rx="50" ry="40" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="8,4"/>
-                    <text x="625" y="265" fill="#d0021b" font-size="12" font-weight="bold">1005 hPa</text>
+                    <!-- High Pressure Isobars -->
+                    <ellipse cx="420" cy="130" rx="55" ry="45" fill="none" stroke="#2b7a3e" stroke-width="2.5" stroke-dasharray="8,4"/>
+                    <ellipse cx="420" cy="130" rx="100" ry="80" fill="none" stroke="#2b7a3e" stroke-width="2" stroke-dasharray="8,4"/>
+                    <ellipse cx="420" cy="130" rx="150" ry="115" fill="none" stroke="#2b7a3e" stroke-width="1.5" stroke-dasharray="8,4"/>
+                    <text x="400" y="125" fill="#2b7a3e" font-size="14" font-weight="bold">1024 hPa</text>
+                    <text x="390" y="145" fill="#2b7a3e" font-size="11">H</text>
                     
-                    <!-- Wind Arrows -->
-                    <line x1="460" y1="150" x2="600" y2="160" stroke="#1a6d8c" stroke-width="3" marker-end="url(#arrowMap)"/>
-                    <line x1="420" y1="200" x2="580" y2="210" stroke="#1a6d8c" stroke-width="2.5" marker-end="url(#arrowMap)"/>
+                    <!-- Low Pressure Isobars -->
+                    <ellipse cx="560" cy="100" rx="50" ry="40" fill="none" stroke="#d0021b" stroke-width="2.5" stroke-dasharray="8,4"/>
+                    <ellipse cx="560" cy="100" rx="95" ry="75" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="8,4"/>
+                    <text x="545" y="95" fill="#d0021b" font-size="14" font-weight="bold">1002 hPa</text>
+                    <text x="545" y="115" fill="#d0021b" font-size="11">L</text>
+                    
+                    <!-- Low over India -->
+                    <ellipse cx="690" cy="240" rx="45" ry="35" fill="none" stroke="#d0021b" stroke-width="2" stroke-dasharray="8,4"/>
+                    <text x="675" y="235" fill="#d0021b" font-size="12" font-weight="bold">1005 hPa</text>
+                    
+                    <!-- Wind arrows -->
+                    <line x1="510" y1="150" x2="580" y2="160" stroke="#1a6d8c" stroke-width="3" marker-end="url(#arrowMap)"/>
+                    <line x1="470" y1="200" x2="550" y2="210" stroke="#1a6d8c" stroke-width="2.5" marker-end="url(#arrowMap)"/>
+                    <line x1="350" y1="250" x2="450" y2="240" stroke="#1a6d8c" stroke-width="2.5" marker-end="url(#arrowMap)"/>
                     
                     <defs>
                         <marker id="arrowMap" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -662,15 +820,15 @@
                 </svg>
             </div>
             <div class="map-legend">
-                <span style="color:#2b7a3e;">●</span> ضغط مرتفع
-                <span style="color:#d0021b;">●</span> ضغط منخفض
+                <span style="color:#2b7a3e;">● H</span> ضغط مرتفع
+                <span style="color:#d0021b;">● L</span> ضغط منخفض
                 <span style="color:#1a6d8c;">➡</span> اتجاه الرياح
-                <span style="display:inline-block; width:25px; height:2px; background:#2b7a3e; margin:0 5px;"></span> خطوط الإيزوبار
+                <span style="display:inline-block; width:30px; height:2px; background:#2b7a3e; margin:0 5px;"></span> خطوط الإيزوبار
             </div>
             <div class="info-box">
                 <p>📖 خطوط الإيزوبار تربط المناطق ذات الضغط المتساوي. الرياح تتحرك موازية لهذه الخطوط.</p>
-                <p>🔵 الضغط المرتفع (H): طقس مستقر ومشمس</p>
-                <p>🔴 الضغط المنخفض (L): طقس غير مستقر مع هطول أمطار</p>
+                <p>🔵 الضغط المرتفع (H): طقس مستقر ومشمس - الرياح تخرج منه باتجاه عقارب الساعة</p>
+                <p>🔴 الضغط المنخفض (L): طقس غير مستقر مع هطول أمطار - الرياح تدخل إليه عكس عقارب الساعة</p>
             </div>
         </div>
     </div>
@@ -680,24 +838,17 @@
         <div class="inner-card">
             <h2>🎮 الألعاب التعليمية</h2>
             <div class="games-flex">
-                <!-- Matching Game -->
+                <!-- Matching Game - FULLY WORKING -->
                 <div class="game-box">
                     <h3>🃏 لعبة التطابق</h3>
-                    <div class="matching-buttons">
-                        <button class="match-card" onclick="matchPressure(1013, 'مشمس')">1013 hPa</button>
-                        <button class="match-card" onclick="matchPressure(990, 'عاصف')">990 hPa</button>
-                        <button class="match-card" onclick="matchPressure(1025, 'غائم')">1025 hPa</button>
-                        <button class="match-card" onclick="matchPressure(980, 'عاصف جداً')">980 hPa</button>
-                        <button class="match-card" onclick="matchPressure(1040, 'جاف')">1040 hPa</button>
+                    <div class="matching-game-area">
+                        <div class="game-score" id="matchScore">🏆 عدد التطابقات: 0 / 5</div>
+                        <div class="pressure-cards" id="pressureCardsArea"></div>
+                        <div style="text-align: center; font-size: 1.2rem;">⬇️ اسحب أو اضغط للمطابقة ⬇️</div>
+                        <div class="weather-cards" id="weatherCardsArea"></div>
+                        <div id="matchMessage"></div>
+                        <button class="btn game-reset-btn" onclick="resetMatchingGame()">🔄 إعادة اللعبة</button>
                     </div>
-                    <div class="weather-types">
-                        <span class="weather-type">☀️ مشمس</span>
-                        <span class="weather-type">☁️ غائم</span>
-                        <span class="weather-type">🌩️ عاصف</span>
-                        <span class="weather-type">🌀 عاصف جداً</span>
-                        <span class="weather-type">🏜️ جاف</span>
-                    </div>
-                    <div id="matchFeedbackMsg"></div>
                 </div>
 
                 <!-- Quiz Game -->
@@ -714,7 +865,7 @@
                     <div class="score-box" id="quizScoreDisplay">⭐ النتيجة: 0</div>
                     <div id="quizFeedbackMsg"></div>
                     <button class="btn" onclick="nextQuizQuestion()" style="width:100%; margin-top:10px;">السؤال التالي ➡️</button>
-                    <div id="prizeDisplay" style="text-align:center; margin-top:15px; font-size:1.2rem;"></div>
+                    <div id="prizeDisplay" style="text-align:center; margin-top:15px; font-size:1.1rem;"></div>
                 </div>
             </div>
         </div>
@@ -726,7 +877,6 @@
 </footer>
 
 <script>
-    // API KEY (your key)
     const API_KEY = '9827bdd4ddaf2cc2c1bf33aa38b20ecf';
     
     // Page Navigation
@@ -783,6 +933,129 @@
         });
     }
 
+    // ==================== MATCHING GAME (FULLY WORKING) ====================
+    let matchPairs = [
+        { pressure: 1013, weather: "☀️ مشمس", weatherName: "مشمس", matched: false },
+        { pressure: 990, weather: "🌧️ ممطر", weatherName: "ممطر", matched: false },
+        { pressure: 1025, weather: "☁️ غائم", weatherName: "غائم", matched: false },
+        { pressure: 980, weather: "🌩️ عاصف", weatherName: "عاصف", matched: false },
+        { pressure: 1040, weather: "🏜️ جاف", weatherName: "جاف", matched: false }
+    ];
+    
+    let selectedPressure = null;
+    let selectedWeather = null;
+    let matchCount = 0;
+    
+    function renderMatchingGame() {
+        const pressureArea = document.getElementById('pressureCardsArea');
+        const weatherArea = document.getElementById('weatherCardsArea');
+        
+        pressureArea.innerHTML = '';
+        weatherArea.innerHTML = '';
+        
+        matchPairs.forEach((pair, idx) => {
+            if (!pair.matched) {
+                const pressureCard = document.createElement('div');
+                pressureCard.className = 'pressure-card';
+                pressureCard.textContent = pair.pressure + ' hPa';
+                pressureCard.onclick = () => selectPressure(idx);
+                pressureArea.appendChild(pressureCard);
+            }
+        });
+        
+        matchPairs.forEach((pair, idx) => {
+            if (!pair.matched) {
+                const weatherCard = document.createElement('div');
+                weatherCard.className = 'weather-card';
+                weatherCard.textContent = pair.weather;
+                weatherCard.onclick = () => selectWeather(idx);
+                weatherArea.appendChild(weatherCard);
+            }
+        });
+        
+        document.getElementById('matchScore').innerHTML = `🏆 عدد التطابقات: ${matchCount} / 5`;
+        
+        if (matchCount === 5) {
+            document.getElementById('matchMessage').innerHTML = '<div class="feedback success">🎉 مبروك! لقد أكملت اللعبة بنجاح! 🎉</div>';
+        }
+    }
+    
+    function selectPressure(idx) {
+        if (matchPairs[idx].matched) return;
+        
+        document.querySelectorAll('.pressure-card').forEach(card => card.classList.remove('selected'));
+        selectedPressure = idx;
+        const cards = document.querySelectorAll('.pressure-card');
+        if (cards[idx - matchPairs.filter((p,i) => !p.matched && i<idx).length]) {
+            // Highlight selected
+            const pressureCards = document.querySelectorAll('.pressure-card');
+            pressureCards.forEach(card => card.classList.remove('selected'));
+            const matchingCard = document.querySelectorAll('.pressure-card')[matchPairs.filter((p,i) => !p.matched && i<idx).length];
+            if (matchingCard) matchingCard.classList.add('selected');
+        }
+        
+        checkMatch();
+    }
+    
+    function selectWeather(idx) {
+        if (matchPairs[idx].matched) return;
+        
+        document.querySelectorAll('.weather-card').forEach(card => card.classList.remove('selected'));
+        selectedWeather = idx;
+        const weatherCards = document.querySelectorAll('.weather-card');
+        weatherCards.forEach(card => card.classList.remove('selected'));
+        const matchingCard = document.querySelectorAll('.weather-card')[matchPairs.filter((p,i) => !p.matched && i<idx).length];
+        if (matchingCard) matchingCard.classList.add('selected');
+        
+        checkMatch();
+    }
+    
+    function checkMatch() {
+        if (selectedPressure !== null && selectedWeather !== null) {
+            const pressurePair = matchPairs[selectedPressure];
+            const weatherPair = matchPairs[selectedWeather];
+            
+            if ((pressurePair.pressure === 1013 && weatherPair.weatherName === 'مشمس') ||
+                (pressurePair.pressure === 990 && weatherPair.weatherName === 'ممطر') ||
+                (pressurePair.pressure === 1025 && weatherPair.weatherName === 'غائم') ||
+                (pressurePair.pressure === 980 && weatherPair.weatherName === 'عاصف') ||
+                (pressurePair.pressure === 1040 && weatherPair.weatherName === 'جاف')) {
+                
+                pressurePair.matched = true;
+                weatherPair.matched = true;
+                matchCount++;
+                
+                document.getElementById('matchMessage').innerHTML = '<div class="feedback success">✅ تطابق صحيح! أحسنت! 🎉</div>';
+                setTimeout(() => {
+                    document.getElementById('matchMessage').innerHTML = '';
+                }, 1500);
+            } else {
+                document.getElementById('matchMessage').innerHTML = '<div class="feedback error">❌ تطابق خاطئ! حاول مرة أخرى</div>';
+                setTimeout(() => {
+                    document.getElementById('matchMessage').innerHTML = '';
+                }, 1500);
+            }
+            
+            selectedPressure = null;
+            selectedWeather = null;
+            renderMatchingGame();
+        }
+    }
+    
+    function resetMatchingGame() {
+        matchPairs = [
+            { pressure: 1013, weather: "☀️ مشمس", weatherName: "مشمس", matched: false },
+            { pressure: 990, weather: "🌧️ ممطر", weatherName: "ممطر", matched: false },
+            { pressure: 1025, weather: "☁️ غائم", weatherName: "غائم", matched: false },
+            { pressure: 980, weather: "🌩️ عاصف", weatherName: "عاصف", matched: false },
+            { pressure: 1040, weather: "🏜️ جاف", weatherName: "جاف", matched: false }
+        ];
+        matchCount = 0;
+        selectedPressure = null;
+        selectedWeather = null;
+        renderMatchingGame();
+    }
+
     // ==================== REAL WEATHER API ====================
     async function getRealWeather() {
         const city = document.getElementById('cityName').value.trim();
@@ -799,28 +1072,20 @@
             const response = await fetch(url);
             const data = await response.json();
             
-            if (response.status === 401) {
-                statusDiv.innerHTML = '❌ خطأ في مفتاح API. يرجى التحقق من المفتاح.';
-                return;
-            }
-            
             if (data.cod === 200) {
-                // Convert pressure from hPa
                 const pressure = data.main.pressure;
                 const temp = Math.round(data.main.temp);
                 const humidity = data.main.humidity;
-                const windSpeed = Math.round(data.wind.speed * 3.6); // convert to km/h
+                const windSpeed = Math.round(data.wind.speed * 3.6);
                 
-                // Get wind direction
                 const windDeg = data.wind.deg;
                 const directions = ['شمالية', 'شمالية شرقية', 'شرقية', 'جنوبية شرقية', 'جنوبية', 'جنوبية غربية', 'غربية', 'شمالية غربية'];
                 const windDir = directions[Math.round(windDeg / 45) % 8];
                 
-                // Weather icon based on pressure
                 let weatherIcon = '';
-                if (pressure >= 1025) weatherIcon = '☀️ مشمس';
-                else if (pressure >= 1005) weatherIcon = '⛅ معتدل';
-                else weatherIcon = '🌧️ ممطر';
+                if (pressure >= 1025) weatherIcon = '☀️';
+                else if (pressure >= 1005) weatherIcon = '⛅';
+                else weatherIcon = '🌧️';
                 
                 document.getElementById('cityDisplay').innerHTML = `${data.name}, ${data.sys.country} ${weatherIcon}`;
                 document.getElementById('pressureDisplay').innerHTML = `${pressure} hPa`;
@@ -829,75 +1094,40 @@
                 document.getElementById('humidityDisplay').innerHTML = `${humidity}%`;
                 document.getElementById('windSpeedDisplay').innerHTML = `${windSpeed} km/h`;
                 
-                let advice = '';
-                if (pressure >= 1025) advice = '🔵 ضغط مرتفع - طقس مستقر وجميل';
-                else if (pressure >= 1005) advice = '🟡 ضغط متوسط - طقس معتدل';
-                else advice = '🔴 ضغط منخفض - احتمال هطول أمطار';
-                
-                statusDiv.innerHTML = `✅ تم تحديث بيانات الطقس لمدينة ${data.name} | ${advice}`;
+                let advice = pressure >= 1025 ? '🔵 ضغط مرتفع - طقس مستقر' : (pressure >= 1005 ? '🟡 ضغط متوسط' : '🔴 ضغط منخفض');
+                statusDiv.innerHTML = `✅ تم تحديث بيانات ${data.name} | ${advice}`;
             } else {
-                statusDiv.innerHTML = `❌ لم يتم العثور على المدينة: ${city}. حاول كتابة الاسم بالإنكليزية (مثال: Cairo)`;
+                statusDiv.innerHTML = `❌ لم يتم العثور على المدينة: ${city}`;
             }
         } catch (error) {
-            statusDiv.innerHTML = '❌ خطأ في الاتصال بخدمة الطقس. تأكد من اتصالك بالإنترنت.';
-            console.error(error);
+            statusDiv.innerHTML = '❌ خطأ في الاتصال بخدمة الطقس';
         }
     }
     
     function getMyLocation() {
-        const statusDiv = document.getElementById('weatherStatus');
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    statusDiv.innerHTML = '📍 تم تحديد موقعك! جاري جلب البيانات...';
-                    
-                    try {
-                        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
-                        const response = await fetch(url);
-                        const data = await response.json();
-                        
-                        if (data.cod === 200) {
-                            document.getElementById('cityName').value = data.name;
-                            getRealWeather();
-                        }
-                    } catch (error) {
-                        statusDiv.innerHTML = '❌ خطأ في جلب بيانات الموقع';
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                try {
+                    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (data.cod === 200) {
+                        document.getElementById('cityName').value = data.name;
+                        getRealWeather();
                     }
-                },
-                () => {
-                    statusDiv.innerHTML = '⚠️ لم نتمكن من تحديد موقعك. الرجاء إدخال المدينة يدوياً.';
+                } catch (error) {
+                    document.getElementById('weatherStatus').innerHTML = '❌ خطأ في جلب بيانات الموقع';
                 }
-            );
-        } else {
-            statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع';
+            });
         }
-    }
-
-    // ==================== MATCHING GAME ====================
-    function matchPressure(pressure, expected) {
-        const feedback = document.getElementById('matchFeedbackMsg');
-        let correct = false;
-        let correctAnswer = '';
-        
-        if (pressure === 1013 && expected === 'مشمس') { correct = true; correctAnswer = 'مشمس'; }
-        else if (pressure === 990 && expected === 'عاصف') { correct = true; correctAnswer = 'عاصف'; }
-        else if (pressure === 1025 && expected === 'غائم') { correct = true; correctAnswer = 'غائم'; }
-        else if (pressure === 980 && expected === 'عاصف جداً') { correct = true; correctAnswer = 'عاصف جداً'; }
-        else if (pressure === 1040 && expected === 'جاف') { correct = true; correctAnswer = 'جاف'; }
-        
-        if (correct) {
-            feedback.innerHTML = '<div class="feedback success">✅ إجابة صحيحة! أحسنت! 🎉</div>';
-        } else {
-            feedback.innerHTML = `<div class="feedback error">❌ حاول مرة أخرى! الضغط ${pressure} hPa يتوافق مع طقس مختلف</div>`;
-        }
-        setTimeout(() => feedback.innerHTML = '', 2000);
     }
 
     // ==================== QUIZ GAME ====================
     let quizScore = 0;
     let quizIndex = 0;
+    let quizAnswered = false;
     const quizQuestions = [
         { text: "ما هو الضغط الجوي القياسي عند سطح البحر؟", options: ["980 hPa", "1013 hPa", "1040 hPa"], correct: 1 },
         { text: "أين تحدث الرياح التجارية؟", options: ["عند خط الإستواء", "عند القطبين", "فقط في المحيط الهادئ"], correct: 0 },
@@ -907,6 +1137,7 @@
     ];
     
     function loadQuizQuestion() {
+        quizAnswered = false;
         if (quizIndex < quizQuestions.length) {
             document.getElementById('quizQuestion').innerHTML = quizQuestions[quizIndex].text;
             const optionsDiv = document.getElementById('quizOptions');
@@ -925,30 +1156,35 @@
     }
     
     function answerQuiz(selected) {
+        if (quizAnswered) return;
+        quizAnswered = true;
+        
         const isCorrect = (selected === quizQuestions[quizIndex].correct);
         const feedback = document.getElementById('quizFeedbackMsg');
+        
         if (isCorrect) {
             quizScore += 10;
             feedback.innerHTML = '<div class="feedback success">✅ إجابة صحيحة! +10 نقاط 🎉</div>';
         } else {
-            feedback.innerHTML = '<div class="feedback error">❌ إجابة خاطئة. حاول في السؤال التالي!</div>';
+            feedback.innerHTML = `<div class="feedback error">❌ إجابة خاطئة. الإجابة الصحيحة: ${quizQuestions[quizIndex].options[quizQuestions[quizIndex].correct]}</div>`;
         }
         document.getElementById('quizScoreDisplay').innerHTML = `⭐ النتيجة: ${quizScore}`;
-        setTimeout(() => {
-            feedback.innerHTML = '';
-            nextQuizQuestion();
-        }, 1500);
     }
     
     function nextQuizQuestion() {
+        if (!quizAnswered && quizIndex < quizQuestions.length - 1) {
+            document.getElementById('quizFeedbackMsg').innerHTML = '<div class="feedback error">⚠️ الرجاء الإجابة على السؤال الحالي أولاً</div>';
+            setTimeout(() => document.getElementById('quizFeedbackMsg').innerHTML = '', 1500);
+            return;
+        }
         quizIndex++;
         loadQuizQuestion();
+        document.getElementById('quizFeedbackMsg').innerHTML = '';
     }
     
-    // Load initial weather
-    setTimeout(() => {
-        getRealWeather();
-    }, 500);
+    // Initialize
+    renderMatchingGame();
+    setTimeout(() => getRealWeather(), 500);
 </script>
 </body>
 </html>

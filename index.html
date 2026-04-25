@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Leaflet Heatmap for weather data -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -66,7 +63,7 @@
         .logo h1 {
             font-size: 1.8rem;
             letter-spacing: 2px;
-            animation: pulse 2s ease-in-out infinite;
+            cursor: pointer;
         }
 
         .logo span {
@@ -122,7 +119,7 @@
         /* Cards */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
             margin-top: 25px;
         }
@@ -184,7 +181,7 @@
 
         /* Map Styles */
         .professional-map {
-            height: 550px;
+            height: 500px;
             width: 100%;
             border-radius: 20px;
             overflow: hidden;
@@ -267,7 +264,7 @@
         /* Live Weather */
         .weather-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 15px;
         }
         .weather-item {
@@ -277,7 +274,7 @@
             text-align: center;
         }
         .weather-value {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #1a6d8c;
             margin-top: 8px;
@@ -299,7 +296,7 @@
         /* Games */
         .games-flex {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 25px;
         }
         .game-box {
@@ -319,13 +316,13 @@
         .pressure-cards, .weather-cards {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
         }
         .pressure-card {
             background: linear-gradient(135deg, #1a6d8c, #0e4d66);
             color: white;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
@@ -337,7 +334,7 @@
         
         .weather-card {
             background: #e8f4f8;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
@@ -375,6 +372,7 @@
             margin: 6px 0;
             text-align: center;
             border: 1px solid #c8e6f5;
+            transition: all 0.3s;
         }
         .quiz-opt:hover { background: #c8e6f5; transform: translateX(-5px); }
         .score-box {
@@ -402,6 +400,7 @@
             cursor: pointer;
             font-family: inherit;
             transition: all 0.3s;
+            margin-top: 10px;
         }
         .btn:hover { background: #0e4d66; transform: translateY(-2px); }
         .footer {
@@ -423,15 +422,15 @@
 
 <header class="main-header">
     <div class="header-content">
-        <div class="logo">
+        <div class="logo" onclick="showPage('home')">
             <h1>reya7<span>🌊</span></h1>
         </div>
-        <div class="nav-links" id="navLinks">
-            <button onclick="showPage('home')" class="active">🏠 الرئيسية</button>
-            <button onclick="showPage('barometer')">📊 البارومتر</button>
-            <button onclick="showPage('map')">🗺️ الخريطة التفاعلية</button>
-            <button onclick="showPage('liveweather')">📍 طقس مدينتك</button>
-            <button onclick="showPage('games')">🎮 الألعاب</button>
+        <div class="nav-links">
+            <button onclick="showPage('home')" id="navHome">🏠 الرئيسية</button>
+            <button onclick="showPage('barometer')" id="navBarometer">📊 البارومتر</button>
+            <button onclick="showPage('map')" id="navMap">🗺️ الخريطة</button>
+            <button onclick="showPage('liveweather')" id="navWeather">📍 طقس مدينتك</button>
+            <button onclick="showPage('games')" id="navGames">🎮 الألعاب</button>
         </div>
     </div>
 </header>
@@ -451,14 +450,14 @@
                 <div class="card-icon">🗺️</div>
                 <div class="card-content">
                     <h3>خريطة العالم التفاعلية</h3>
-                    <p>خريطة احترافية مع بيانات الطقس الحية وطبقات الإيزوبار</p>
+                    <p>خريطة احترافية مع بيانات الطقس الحية</p>
                 </div>
             </div>
             <div class="card" onclick="showPage('liveweather')">
                 <div class="card-icon">📍</div>
                 <div class="card-content">
                     <h3>طقس مدينتك</h3>
-                    <p>بيانات حية عن الضغط الجوي والرياح باستخدام API</p>
+                    <p>بيانات حية عن الضغط الجوي والرياح</p>
                 </div>
             </div>
             <div class="card" onclick="showPage('games')">
@@ -497,20 +496,18 @@
         </div>
     </div>
 
-    <!-- PROFESSIONAL MAP PAGE -->
+    <!-- MAP PAGE -->
     <div id="mapPage" class="page">
         <div class="inner-card">
-            <h2>🗺️ خريطة العالم التفاعلية - بيانات الطقس الحية</h2>
+            <h2>🗺️ خريطة العالم التفاعلية</h2>
             <div class="professional-map" id="weatherMap"></div>
             <div class="map-legend">
                 <span><span class="legend-dot" style="background:#2b7a3e;"></span> ضغط مرتفع</span>
-                <span><span class="legend-dot" style="background:#d0021b;"></span> ضعف منخفض</span>
-                <span><span class="legend-dot" style="background:#1a6d8c;"></span> رياح</span>
-                <span><span class="legend-dot" style="background:#f5a623;"></span> محطات طقس</span>
+                <span><span class="legend-dot" style="background:#d0021b;"></span> ضغط منخفض</span>
+                <span><span class="legend-dot" style="background:#f5a623;"></span> ضغط متوسط</span>
             </div>
             <div class="info-box">
-                <p>🌍 <strong>خريطة تفاعلية احترافية</strong> - يمكنك التحريك والتكبير | تعرض بيانات حقيقية عن الضغط الجوي والرياح</p>
-                <p>💡 <strong>نصيحة:</strong> اضغط على أي نقطة حمراء لرؤية تفاصيل الطقس في تلك المنطقة</p>
+                <p>🌍 <strong>خريطة تفاعلية</strong> - يمكنك التحريك والتكبير | اضغط على أي نقطة لرؤية تفاصيل الطقس</p>
             </div>
         </div>
     </div>
@@ -518,7 +515,7 @@
     <!-- LIVE WEATHER PAGE -->
     <div id="liveweatherPage" class="page">
         <div class="inner-card">
-            <h2>📍 طقس مدينتك الآن - بيانات حية</h2>
+            <h2>📍 طقس مدينتك الآن</h2>
             <div class="city-input">
                 <input type="text" id="cityName" placeholder="أدخل اسم المدينة (مثال: Cairo, Dubai, London)" value="Cairo">
                 <button class="btn" onclick="getRealWeather()">🔍 بحث</button>
@@ -544,7 +541,6 @@
         <div class="inner-card">
             <h2>🎮 الألعاب التعليمية</h2>
             <div class="games-flex">
-                <!-- Matching Game -->
                 <div class="game-box">
                     <h3>🃏 لعبة التطابق</h3>
                     <div class="game-score" id="matchScore">🏆 التطابقات: 0 / 5</div>
@@ -552,10 +548,9 @@
                     <div style="text-align: center; margin: 10px 0;">⬇️ اضغط للمطابقة ⬇️</div>
                     <div class="weather-cards" id="weatherCardsArea"></div>
                     <div id="matchMessage"></div>
-                    <button class="btn" style="width:100%; margin-top:12px;" onclick="resetMatchingGame()">🔄 إعادة اللعبة</button>
+                    <button class="btn" style="width:100%;" onclick="resetMatchingGame()">🔄 إعادة اللعبة</button>
                 </div>
 
-                <!-- Quiz Game -->
                 <div class="game-box">
                     <h3>📝 اختبار سريع</h3>
                     <div class="quiz-area" id="quizArea">
@@ -582,132 +577,136 @@
 
 <script>
     const API_KEY = '9827bdd4ddaf2cc2c1bf33aa38b20ecf';
-    let weatherMap;
-    let markers = [];
+    let weatherMap = null;
+    let mapInitialized = false;
     
-    // Page Navigation
+    // ==================== PAGE NAVIGATION ====================
     function showPage(pageName) {
+        // Hide all pages
         document.querySelectorAll('.page').forEach(page => {
             page.classList.remove('active-page');
         });
-        document.getElementById(pageName + 'Page').classList.add('active-page');
         
-        // Initialize map if not already done
-        if (pageName === 'map' && !weatherMap) {
-            initProfessionalMap();
+        // Show selected page
+        const selectedPage = document.getElementById(pageName + 'Page');
+        if (selectedPage) {
+            selectedPage.classList.add('active-page');
+        }
+        
+        // Update active button
+        document.querySelectorAll('.nav-links button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Find and highlight the active button
+        const buttons = document.querySelectorAll('.nav-links button');
+        if (pageName === 'home') buttons[0]?.classList.add('active');
+        else if (pageName === 'barometer') buttons[1]?.classList.add('active');
+        else if (pageName === 'map') buttons[2]?.classList.add('active');
+        else if (pageName === 'liveweather') buttons[3]?.classList.add('active');
+        else if (pageName === 'games') buttons[4]?.classList.add('active');
+        
+        // Initialize map only when map page is shown and not initialized
+        if (pageName === 'map' && !mapInitialized) {
+            setTimeout(() => initProfessionalMap(), 100);
         }
     }
     
     // ==================== PROFESSIONAL MAP ====================
     function initProfessionalMap() {
-        // Create map centered on world
-        weatherMap = L.map('weatherMap').setView([20, 0], 2);
+        if (mapInitialized || !document.getElementById('weatherMap')) return;
         
-        // Add beautiful tile layer (CartoDB Voyager - clean and professional)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
-            subdomains: 'abcd',
-            maxZoom: 19,
-            minZoom: 1
-        }).addTo(weatherMap);
-        
-        // Add OpenWeatherMap pressure overlay (isobars)
-        L.tileLayer(`https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
-            opacity: 0.6,
-            attribution: 'Pressure data © OpenWeatherMap'
-        }).addTo(weatherMap);
-        
-        // Add wind speed overlay
-        L.tileLayer(`https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
-            opacity: 0.5,
-            attribution: 'Wind data © OpenWeatherMap'
-        }).addTo(weatherMap);
-        
-        // Add precipitation overlay
-        L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
-            opacity: 0.4,
-            attribution: 'Precipitation © OpenWeatherMap'
-        }).addTo(weatherMap);
-        
-        // Add sample pressure markers (major cities)
-        const pressurePoints = [
-            { lat: 38.7, lon: -9.1, pressure: 1024, city: "لشبونة", temp: 18, condition: "☀️" },
-            { lat: 40.7, lon: -74.0, pressure: 1020, city: "نيويورك", temp: 15, condition: "⛅" },
-            { lat: 51.5, lon: -0.1, pressure: 1013, city: "لندن", temp: 12, condition: "🌧️" },
-            { lat: 35.7, lon: 139.7, pressure: 1018, city: "طوكيو", temp: 20, condition: "☀️" },
-            { lat: 30.0, lon: 31.2, pressure: 1015, city: "القاهرة", temp: 28, condition: "☀️" },
-            { lat: 25.2, lon: 55.3, pressure: 1012, city: "دبي", temp: 32, condition: "☀️" },
-            { lat: 55.7, lon: 37.6, pressure: 1010, city: "موسكو", temp: 5, condition: "❄️" },
-            { lat: -33.9, lon: 151.2, pressure: 1016, city: "سيدني", temp: 22, condition: "☀️" ],
-            { lat: 19.0, lon: 72.8, pressure: 1011, city: "مومباي", temp: 30, condition: "🌧️" },
-            { lat: -23.5, lon: -46.6, pressure: 1017, city: "ساو باولو", temp: 24, condition: "⛅" }
-        ];
-        
-        // Add markers for each pressure point
-        pressurePoints.forEach(point => {
-            // Determine color based on pressure
-            let color = '#2b7a3e'; // green for high pressure
-            if (point.pressure < 1005) color = '#d0021b'; // red for low pressure
-            else if (point.pressure < 1015) color = '#f5a623'; // orange for medium
+        try {
+            // Create map centered on world
+            weatherMap = L.map('weatherMap').setView([20, 0], 2);
             
-            // Create custom marker
-            const markerHtml = `
-                <div style="
-                    background: ${color};
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-weight: bold;
-                    font-size: 12px;
-                    border: 2px solid white;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                    cursor: pointer;
-                ">
-                    ${point.pressure}
-                </div>
-            `;
+            // Add beautiful tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CartoDB',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(weatherMap);
             
-            const customIcon = L.divIcon({
-                html: markerHtml,
-                iconSize: [30, 30],
-                className: 'custom-pressure-marker'
+            // Add OpenWeatherMap pressure overlay if API key works
+            if (API_KEY && API_KEY !== 'YOUR_API_KEY_HERE') {
+                L.tileLayer(`https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
+                    opacity: 0.5,
+                    attribution: 'Pressure data © OpenWeatherMap'
+                }).addTo(weatherMap);
+            }
+            
+            // Add markers for major cities with pressure data
+            const pressurePoints = [
+                { lat: 38.7, lon: -9.1, pressure: 1024, city: "لشبونة", temp: 18, condition: "☀️", pressureType: "high" },
+                { lat: 40.7, lon: -74.0, pressure: 1020, city: "نيويورك", temp: 15, condition: "⛅", pressureType: "medium" },
+                { lat: 51.5, lon: -0.1, pressure: 1013, city: "لندن", temp: 12, condition: "🌧️", pressureType: "medium" },
+                { lat: 35.7, lon: 139.7, pressure: 1018, city: "طوكيو", temp: 20, condition: "☀️", pressureType: "medium" },
+                { lat: 30.0, lon: 31.2, pressure: 1015, city: "القاهرة", temp: 28, condition: "☀️", pressureType: "medium" },
+                { lat: 25.2, lon: 55.3, pressure: 1012, city: "دبي", temp: 32, condition: "☀️", pressureType: "medium" },
+                { lat: 55.7, lon: 37.6, pressure: 1010, city: "موسكو", temp: 5, condition: "❄️", pressureType: "low" },
+                { lat: -33.9, lon: 151.2, pressure: 1016, city: "سيدني", temp: 22, condition: "☀️", pressureType: "medium" },
+                { lat: 19.0, lon: 72.8, pressure: 1011, city: "مومباي", temp: 30, condition: "🌧️", pressureType: "medium" },
+                { lat: -23.5, lon: -46.6, pressure: 1017, city: "ساو باولو", temp: 24, condition: "⛅", pressureType: "medium" }
+            ];
+            
+            pressurePoints.forEach(point => {
+                let color = '#2b7a3e';
+                if (point.pressure < 1005) color = '#d0021b';
+                else if (point.pressure < 1015) color = '#f5a623';
+                
+                const markerHtml = `
+                    <div style="
+                        background: ${color};
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: bold;
+                        font-size: 12px;
+                        border: 2px solid white;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        cursor: pointer;
+                    ">
+                        ${point.pressure}
+                    </div>
+                `;
+                
+                const customIcon = L.divIcon({
+                    html: markerHtml,
+                    iconSize: [36, 36],
+                    className: 'custom-pressure-marker'
+                });
+                
+                const marker = L.marker([point.lat, point.lon], { icon: customIcon }).addTo(weatherMap);
+                
+                marker.bindPopup(`
+                    <div style="text-align: center; font-family: 'Cairo', sans-serif; min-width: 150px;">
+                        <h3 style="margin: 0 0 5px 0;">${point.city}</h3>
+                        <p style="font-size: 28px; margin: 5px 0;">${point.condition}</p>
+                        <p><strong>الضغط:</strong> ${point.pressure} hPa</p>
+                        <p><strong>الحرارة:</strong> ${point.temp}°C</p>
+                        <p style="color: ${color}; font-weight: bold;">
+                            ${point.pressure >= 1020 ? '🔵 ضغط مرتفع' : (point.pressure <= 1005 ? '🔴 ضغط منخفض' : '🟡 ضغط متوسط')}
+                        </p>
+                    </div>
+                `);
             });
             
-            const marker = L.marker([point.lat, point.lon], { icon: customIcon }).addTo(weatherMap);
+            // Add scale bar
+            L.control.scale({ metric: true, imperial: false, position: 'bottomleft' }).addTo(weatherMap);
             
-            // Add popup with weather info
-            marker.bindPopup(`
-                <div style="text-align: center; font-family: 'Cairo', sans-serif;">
-                    <h3>${point.city}</h3>
-                    <p style="font-size: 24px; margin: 5px 0;">${point.condition}</p>
-                    <p><strong>الضغط:</strong> ${point.pressure} hPa</p>
-                    <p><strong>الحرارة:</strong> ${point.temp}°C</p>
-                    <p style="color: ${color};">${point.pressure >= 1020 ? '🔵 ضغط مرتفع' : (point.pressure <= 1005 ? '🔴 ضغط منخفض' : '🟡 ضغط متوسط')}</p>
-                </div>
-            `);
+            mapInitialized = true;
             
-            markers.push(marker);
-        });
-        
-        // Add a scale bar
-        L.control.scale({ metric: true, imperial: false, position: 'bottomleft' }).addTo(weatherMap);
-        
-        // Add a layer control
-        const baseMaps = {
-            "خريطة عادية": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', { attribution: '© CartoDB' })
-        };
-        
-        const overlayMaps = {
-            "طبقة الضغط الجوي": L.tileLayer(`https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.6 }),
-            "طبقة الرياح": L.tileLayer(`https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.5 }),
-            "طبقة الأمطار": L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.4 })
-        };
-        
-        L.control.layers(baseMaps, overlayMaps).addTo(weatherMap);
+        } catch (error) {
+            console.error('Map initialization error:', error);
+            const mapDiv = document.getElementById('weatherMap');
+            if (mapDiv) {
+                mapDiv.innerHTML = '<div style="padding: 20px; text-align: center;">⚠️ حدث خطأ في تحميل الخريطة. يرجى تحديث الصفحة.</div>';
+            }
+        }
     }
     
     // ==================== BAROMETER ====================
@@ -769,6 +768,8 @@
         const pressureArea = document.getElementById('pressureCardsArea');
         const weatherArea = document.getElementById('weatherCardsArea');
         
+        if (!pressureArea || !weatherArea) return;
+        
         pressureArea.innerHTML = '';
         weatherArea.innerHTML = '';
         
@@ -792,28 +793,34 @@
             }
         });
         
-        document.getElementById('matchScore').innerHTML = `🏆 التطابقات: ${matchCount} / 5`;
+        const matchScoreDiv = document.getElementById('matchScore');
+        if (matchScoreDiv) {
+            matchScoreDiv.innerHTML = `🏆 التطابقات: ${matchCount} / 5`;
+        }
         
         if (matchCount === 5) {
-            document.getElementById('matchMessage').innerHTML = '<div class="feedback success">🎉 مبروك! أكملت اللعبة بنجاح! 🎉</div>';
+            const matchMsg = document.getElementById('matchMessage');
+            if (matchMsg) matchMsg.innerHTML = '<div class="feedback success">🎉 مبروك! أكملت اللعبة بنجاح! 🎉</div>';
         }
     }
     
     function selectPressure(idx) {
         if (matchPairs[idx].matched) return;
         selectedPressure = idx;
-        renderMatchingGame();
+        document.querySelectorAll('.pressure-card').forEach(card => card.classList.remove('selected'));
         const cards = document.querySelectorAll('.pressure-card');
-        if (cards[0]) cards[0].classList.add('selected');
+        const visibleIndex = matchPairs.filter((p, i) => !p.matched && i < idx).length;
+        if (cards[visibleIndex]) cards[visibleIndex].classList.add('selected');
         checkMatch();
     }
     
     function selectWeather(idx) {
         if (matchPairs[idx].matched) return;
         selectedWeather = idx;
-        renderMatchingGame();
+        document.querySelectorAll('.weather-card').forEach(card => card.classList.remove('selected'));
         const cards = document.querySelectorAll('.weather-card');
-        if (cards[0]) cards[0].classList.add('selected');
+        const visibleIndex = matchPairs.filter((p, i) => !p.matched && i < idx).length;
+        if (cards[visibleIndex]) cards[visibleIndex].classList.add('selected');
         checkMatch();
     }
     
@@ -829,16 +836,19 @@
             else if (pressurePair.pressure === 980 && weatherPair.weatherName === 'عاصف') isMatch = true;
             else if (pressurePair.pressure === 1040 && weatherPair.weatherName === 'جاف') isMatch = true;
             
+            const matchMsg = document.getElementById('matchMessage');
             if (isMatch) {
                 pressurePair.matched = true;
                 weatherPair.matched = true;
                 matchCount++;
-                document.getElementById('matchMessage').innerHTML = '<div class="feedback success">✅ تطابق صحيح! 🎉</div>';
+                if (matchMsg) matchMsg.innerHTML = '<div class="feedback success">✅ تطابق صحيح! 🎉</div>';
             } else {
-                document.getElementById('matchMessage').innerHTML = '<div class="feedback error">❌ تطابق خاطئ! حاول مرة أخرى</div>';
+                if (matchMsg) matchMsg.innerHTML = '<div class="feedback error">❌ تطابق خاطئ! حاول مرة أخرى</div>';
             }
             
-            setTimeout(() => document.getElementById('matchMessage').innerHTML = '', 1500);
+            setTimeout(() => {
+                if (matchMsg) matchMsg.innerHTML = '';
+            }, 1500);
             
             selectedPressure = null;
             selectedWeather = null;
@@ -862,11 +872,11 @@
     
     // ==================== REAL WEATHER API ====================
     async function getRealWeather() {
-        const city = document.getElementById('cityName').value.trim();
+        const city = document.getElementById('cityName')?.value.trim();
         if (!city) return;
         
         const statusDiv = document.getElementById('weatherStatus');
-        statusDiv.innerHTML = '⏳ جاري الاتصال بخدمة الطقس...';
+        if (statusDiv) statusDiv.innerHTML = '⏳ جاري الاتصال بخدمة الطقس...';
         
         try {
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
@@ -883,20 +893,27 @@
                 const directions = ['شمالية', 'شمالية شرقية', 'شرقية', 'جنوبية شرقية', 'جنوبية', 'جنوبية غربية', 'غربية', 'شمالية غربية'];
                 const windDir = directions[Math.round(windDeg / 45) % 8];
                 
-                document.getElementById('cityDisplay').innerHTML = `${data.name}, ${data.sys.country}`;
-                document.getElementById('pressureDisplay').innerHTML = `${pressure} hPa`;
-                document.getElementById('windDirDisplay').innerHTML = windDir;
-                document.getElementById('tempDisplay').innerHTML = `${temp} °C`;
-                document.getElementById('humidityDisplay').innerHTML = `${humidity}%`;
-                document.getElementById('windSpeedDisplay').innerHTML = `${windSpeed} km/h`;
+                const cityDisplay = document.getElementById('cityDisplay');
+                const pressureDisplay = document.getElementById('pressureDisplay');
+                const windDirDisplay = document.getElementById('windDirDisplay');
+                const tempDisplay = document.getElementById('tempDisplay');
+                const humidityDisplay = document.getElementById('humidityDisplay');
+                const windSpeedDisplay = document.getElementById('windSpeedDisplay');
                 
-                let advice = pressure >= 1025 ? '🔵 ضغط مرتفع - طقس مستقر' : (pressure >= 1005 ? '🟡 ضغط متوسط' : '🔴 ضغط منخفض');
-                statusDiv.innerHTML = `✅ تم تحديث بيانات ${data.name} | ${advice}`;
+                if (cityDisplay) cityDisplay.innerHTML = `${data.name}, ${data.sys.country}`;
+                if (pressureDisplay) pressureDisplay.innerHTML = `${pressure} hPa`;
+                if (windDirDisplay) windDirDisplay.innerHTML = windDir;
+                if (tempDisplay) tempDisplay.innerHTML = `${temp} °C`;
+                if (humidityDisplay) humidityDisplay.innerHTML = `${humidity}%`;
+                if (windSpeedDisplay) windSpeedDisplay.innerHTML = `${windSpeed} km/h`;
+                
+                let advice = pressure >= 1025 ? '🔵 ضغط مرتفع' : (pressure >= 1005 ? '🟡 ضغط متوسط' : '🔴 ضغط منخفض');
+                if (statusDiv) statusDiv.innerHTML = `✅ تم تحديث بيانات ${data.name} | ${advice}`;
             } else {
-                statusDiv.innerHTML = `❌ لم يتم العثور على المدينة: ${city}`;
+                if (statusDiv) statusDiv.innerHTML = `❌ لم يتم العثور على المدينة: ${city}`;
             }
         } catch (error) {
-            statusDiv.innerHTML = '❌ خطأ في الاتصال بخدمة الطقس';
+            if (statusDiv) statusDiv.innerHTML = '❌ خطأ في الاتصال بخدمة الطقس';
         }
     }
     
@@ -910,11 +927,13 @@
                     const response = await fetch(url);
                     const data = await response.json();
                     if (data.cod === 200) {
-                        document.getElementById('cityName').value = data.name;
+                        const cityInput = document.getElementById('cityName');
+                        if (cityInput) cityInput.value = data.name;
                         getRealWeather();
                     }
                 } catch (error) {
-                    document.getElementById('weatherStatus').innerHTML = '❌ خطأ في جلب بيانات الموقع';
+                    const statusDiv = document.getElementById('weatherStatus');
+                    if (statusDiv) statusDiv.innerHTML = '❌ خطأ في جلب بيانات الموقع';
                 }
             });
         }
@@ -935,17 +954,27 @@
     function loadQuizQuestion() {
         quizAnswered = false;
         if (quizIndex < quizQuestions.length) {
-            document.getElementById('quizQuestion').innerHTML = quizQuestions[quizIndex].text;
-            const optionsDiv = document.getElementById('quizOptions');
-            optionsDiv.innerHTML = '';
-            quizQuestions[quizIndex].options.forEach((opt, idx) => {
-                optionsDiv.innerHTML += `<div class="quiz-opt" onclick="answerQuiz(${idx})">${opt}</div>`;
-            });
+            const quizQuestion = document.getElementById('quizQuestion');
+            const quizOptions = document.getElementById('quizOptions');
+            
+            if (quizQuestion) quizQuestion.innerHTML = quizQuestions[quizIndex].text;
+            if (quizOptions) {
+                quizOptions.innerHTML = '';
+                quizQuestions[quizIndex].options.forEach((opt, idx) => {
+                    quizOptions.innerHTML += `<div class="quiz-opt" onclick="answerQuiz(${idx})">${opt}</div>`;
+                });
+            }
         } else {
-            document.getElementById('quizArea').innerHTML = `<div class="feedback success">🏆 انتهى الاختبار! نتيجتك: ${quizScore}/50 🎉</div>`;
-            if (quizScore >= 40) document.getElementById('prizeDisplay').innerHTML = '🎁 الجائزة: 🥇 وسام خبير الطقس!';
-            else if (quizScore >= 30) document.getElementById('prizeDisplay').innerHTML = '🎁 الجائزة: 🥈 وسام فضي!';
-            else document.getElementById('prizeDisplay').innerHTML = '🎁 حاول مرة أخرى للحصول على الجائزة!';
+            const quizArea = document.getElementById('quizArea');
+            if (quizArea) {
+                quizArea.innerHTML = `<div class="feedback success">🏆 انتهى الاختبار! نتيجتك: ${quizScore}/50 🎉</div>`;
+            }
+            const prizeDisplay = document.getElementById('prizeDisplay');
+            if (prizeDisplay) {
+                if (quizScore >= 40) prizeDisplay.innerHTML = '🎁 الجائزة: 🥇 وسام خبير الطقس!';
+                else if (quizScore >= 30) prizeDisplay.innerHTML = '🎁 الجائزة: 🥈 وسام فضي!';
+                else prizeDisplay.innerHTML = '🎁 حاول مرة أخرى للحصول على الجائزة!';
+            }
         }
     }
     
@@ -955,30 +984,44 @@
         
         const isCorrect = (selected === quizQuestions[quizIndex].correct);
         const feedback = document.getElementById('quizFeedbackMsg');
+        const quizScoreDisplay = document.getElementById('quizScoreDisplay');
         
         if (isCorrect) {
             quizScore += 10;
-            feedback.innerHTML = '<div class="feedback success">✅ صحيح! +10 نقاط 🎉</div>';
+            if (feedback) feedback.innerHTML = '<div class="feedback success">✅ صحيح! +10 نقاط 🎉</div>';
         } else {
-            feedback.innerHTML = `<div class="feedback error">❌ خطأ! الإجابة: ${quizQuestions[quizIndex].options[quizQuestions[quizIndex].correct]}</div>`;
+            if (feedback) feedback.innerHTML = `<div class="feedback error">❌ خطأ! الإجابة: ${quizQuestions[quizIndex].options[quizQuestions[quizIndex].correct]}</div>`;
         }
-        document.getElementById('quizScoreDisplay').innerHTML = `⭐ النتيجة: ${quizScore}`;
+        if (quizScoreDisplay) quizScoreDisplay.innerHTML = `⭐ النتيجة: ${quizScore}`;
     }
     
     function nextQuizQuestion() {
         if (!quizAnswered && quizIndex < quizQuestions.length - 1) {
-            document.getElementById('quizFeedbackMsg').innerHTML = '<div class="feedback error">⚠️ أجب على السؤال أولاً</div>';
-            setTimeout(() => document.getElementById('quizFeedbackMsg').innerHTML = '', 1500);
+            const feedback = document.getElementById('quizFeedbackMsg');
+            if (feedback) {
+                feedback.innerHTML = '<div class="feedback error">⚠️ أجب على السؤال أولاً</div>';
+                setTimeout(() => feedback.innerHTML = '', 1500);
+            }
             return;
         }
         quizIndex++;
         loadQuizQuestion();
-        document.getElementById('quizFeedbackMsg').innerHTML = '';
+        const feedback = document.getElementById('quizFeedbackMsg');
+        if (feedback) feedback.innerHTML = '';
     }
     
-    // Initialize
-    renderMatchingGame();
-    setTimeout(() => getRealWeather(), 500);
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        renderMatchingGame();
+        setTimeout(() => getRealWeather(), 500);
+        
+        // Add click handlers to nav buttons to ensure they work
+        document.querySelectorAll('.nav-links button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    });
 </script>
 </body>
 </html>
